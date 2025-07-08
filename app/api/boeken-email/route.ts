@@ -447,7 +447,7 @@ export async function POST(request: NextRequest) {
           : "Thank you for your booking request. We will contact you as soon as possible with a quote."
         const contactInfo = isNL
           ? "Voor vragen kunt u contact met ons opnemen via:"
-          : "For questions, you can contact us via:"
+          : "For questions, you can contact us via:" 
 
         let serviceDetails = ""
         if (data.rideType === "hourly" && data.serviceType) {
