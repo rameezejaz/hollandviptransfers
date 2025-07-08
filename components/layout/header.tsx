@@ -140,9 +140,18 @@ export default function Header() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="bg-gray-800 border-gray-700 text-white">
                       {link.items?.map((item) => (
-                        <DropdownMenuItem key={item.label} asChild>
+                        <DropdownMenuItem
+                          key={item.label}
+                          asChild
+                          className="
+                          cursor-pointer
+                          hover:bg-orange-500/10 focus:bg-orange-500/10
+                          hover:text-orange-400 focus:text-orange-400
+                          transition-colors duration-200"
+                          >
                           <Link href={item.href}>{item.label}</Link>
                         </DropdownMenuItem>
+
                       ))}
                     </DropdownMenuContent>
                   </DropdownMenu>

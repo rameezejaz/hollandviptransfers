@@ -215,7 +215,7 @@ export default function SightseeingContent() {
               <span className="text-orange-400 font-medium">{t("services.sightseeing.title")}</span>
             </div>
 
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-8 leading-tight">
+            <h1 className="text-5xl md:text-7xl font-bold text-white mb-8 leading-tigh hyphens-auto">
               {t("services.sightseeing.subtitle")}
             </h1>
 
