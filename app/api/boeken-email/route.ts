@@ -553,7 +553,7 @@ export async function POST(request: NextRequest) {
       // Email to owner
       resend.emails.send({
         from: "Holland VIP Transfers <info@hollandviptransfers.com>",
-        to: ["info@hollandviptransfers.com"],
+        to: ["hakanbektas934@gmail.com"],
         subject: subjects.owner,
         html: createEmailContent(true),
       }),
