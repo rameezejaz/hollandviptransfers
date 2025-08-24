@@ -29,7 +29,7 @@ export default function HomeContent() {
     {
       title: t("home.services.corporate.title"),
       desc: t("home.services.corporate.desc"),
-      href: "/diensten/corporate-events",
+      href: "/diensten/zakelijk-vervoer",
       img: "/images/filler/4.jpg",
     },
     {
