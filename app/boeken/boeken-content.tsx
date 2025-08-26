@@ -575,53 +575,53 @@ export default function BookingContent() {
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="from" className="text-white font-medium">
-                        {t("booking.form.from")}
-                      </Label>
-                      <Controller
-                        name="from"
-                        control={control}
-                        render={({ field }) => (
-                          <PlaceAutocompleteInput
-                            id="from"
-                            placeholder={language === "nl" ? "Ophaallocatie" : "Pick-up location"}
-                            value={field.value}
-                            onChange={(val) => {
-                              field.onChange(val)
-                              clearErrors("from")
-                            }}
-                            className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg"
-                          />
-                        )}
-                      />
-                      {errors.from && <p className="text-red-400 text-sm">{errors.from.message}</p>}
-                    </div>
-
-                    {rideType === "one_way" && (
                       <div className="space-y-2">
-                        <Label htmlFor="to" className="text-white font-medium">
-                          {t("booking.form.to")}
+                        <Label htmlFor="from" className="text-white font-medium">
+                          {t("booking.form.from")}
                         </Label>
                         <Controller
-                          name="to"
+                          name="from"
                           control={control}
                           render={({ field }) => (
-                            <PlaceAutocompleteInput
-                              id="to"
-                              placeholder={language === "nl" ? "Bestemmingslocatie" : "Drop-off location"}
-                              value={field.value}
-                              onChange={(val) => {
-                                field.onChange(val)
-                                clearErrors("to")
+                            <Input
+                              id="from"
+                              placeholder={language === "nl" ? "Ophaallocatie" : "Pick-up location"}
+                              className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20"
+                              {...field}
+                              onChange={(e) => {
+                                field.onChange(e.target.value)
+                                clearErrors("from")
                               }}
-                              className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg"
                             />
                           )}
                         />
-                        {errors.to && <p className="text-red-400 text-sm">{errors.to.message}</p>}
+                        {errors.from && <p className="text-red-400 text-sm">{errors.from.message}</p>}
                       </div>
-                    )}
+
+                      {rideType === "one_way" && (
+                        <div className="space-y-2">
+                          <Label htmlFor="to" className="text-white font-medium">
+                            {t("booking.form.to")}
+                          </Label>
+                          <Controller
+                            name="to"
+                            control={control}
+                            render={({ field }) => (
+                              <Input
+                                id="to"
+                                placeholder={language === "nl" ? "Bestemmingslocatie" : "Drop-off location"}
+                                className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20"
+                                {...field}
+                                onChange={(e) => {
+                                  field.onChange(e.target.value)
+                                  clearErrors("to")
+                                }}
+                              />
+                            )}
+                          />
+                          {errors.to && <p className="text-red-400 text-sm">{errors.to.message}</p>}
+                        </div>
+                      )}
 
                     {rideType === "hourly" && (
                       <>
