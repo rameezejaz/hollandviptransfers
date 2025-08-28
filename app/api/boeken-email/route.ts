@@ -529,7 +529,7 @@ export async function POST(request: NextRequest) {
               <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
                 <p style="color: #666; line-height: 1.6;">${contactInfo}</p>
                 <p style="color: #666;">
-                  📧 Email: info@hollandviptransfers.com<br>
+                  📧 Email: Info@hollandviptransfers.nl<br>
                   📱 ${isNL ? "Telefoon" : "Phone"}: +31 (0) 123 456 789<br>
                   🌐 Website: www.hollandviptransfers.com
                 </p>
@@ -553,7 +553,7 @@ export async function POST(request: NextRequest) {
       // Email to owner
       resend.emails.send({
         from: "Holland VIP Transfers <info@hollandviptransfers.com>",
-        to: ["info@hollandviptransfers.com"],
+        to: ["info@hollandviptransfers.nl"],
         subject: subjects.owner,
         html: createEmailContent(true),
       }),
