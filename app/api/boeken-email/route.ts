@@ -530,7 +530,7 @@ export async function POST(request: NextRequest) {
                 <p style="color: #666; line-height: 1.6;">${contactInfo}</p>
                 <p style="color: #666;">
                   📧 Email: Info@hollandviptransfers.nl<br>
-                  📱 ${isNL ? "Telefoon" : "Phone"}: +31 (0) 123 456 789<br>
+                  📱 ${isNL ? "Telefoon" : "Phone"}: +31 20 308 60 43<br>
                   🌐 Website: www.hollandviptransfers.com
                 </p>
               </div>
