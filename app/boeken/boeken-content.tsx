@@ -136,7 +136,7 @@ const vehicles = [
     name: "Mercedes Sprinter",
     type: "Luxury Minibus",
     img: "/images/cars/sprinter/front2.jpeg",
-    passengers: 8,
+    passengers: 28,
     luggage: 10,
   },
   {
@@ -865,7 +865,7 @@ export default function BookingContent() {
                     <div className="space-y-2">
                       <Label htmlFor="baggage" className="text-white font-medium flex items-center gap-2">
                         <Luggage className="w-4 h-4" />
-                        {language === "nl" ? "Aantal bagage (0-20)" : "Number of Luggage (0-20)"}
+                        {language === "nl" ? "Aantal bagage (1-20)" : "Number of Luggage (1-20)"}
                       </Label>
                       <Controller
                         name="baggage"
