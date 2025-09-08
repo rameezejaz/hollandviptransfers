@@ -8,6 +8,12 @@ import { LanguageProvider } from "@/contexts/language-context"
 import GoogleMapsProvider from "@/components/GoogleMapsProvider"
 import "./globals.css"
 
+//GTM
+import Script from "next/script"
+import GtmPageView from "@/components/GtmPageView"
+
+
+
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
