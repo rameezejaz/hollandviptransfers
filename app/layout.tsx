@@ -11,8 +11,12 @@ import "./globals.css"
 
 // GTM
 import Script from "next/script"
-//import GtmPageView from "@/components/GtmPageView"
+// Using a relative import is fine; keep this if your alias @/* isn't set up.
+// Make sure the file exists at: /components/GtmPageView.tsx (capital V!)
 import GtmPageView from "../components/GtmPageView"
+
+// ⬅️ Required to wrap components that use useSearchParams/usePathname
+import { Suspense } from "react"
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -49,7 +53,8 @@ export default function RootLayout({
   return (
     <html lang="nl" className="scroll-smooth">
       <head>
-        {/* Google Tag Manager – main script */}
+        {/* Google Tag Manager – main script.
+            Loads after hydration (non-blocking). Only in production if GTM ID present. */}
         {process.env.NODE_ENV === "production" && gtmId && (
           <Script id="gtm" strategy="afterInteractive">
             {`
@@ -70,7 +75,7 @@ export default function RootLayout({
           playfair.variable,
         )}
       >
-        {/* Google Tag Manager (noscript) – must be right after <body> */}
+        {/* Google Tag Manager (noscript) – must be right after <body>. */}
         {process.env.NODE_ENV === "production" && gtmId && (
           <noscript>
             <iframe
@@ -82,8 +87,12 @@ export default function RootLayout({
           </noscript>
         )}
 
-        {/* SPA pageview events for GTM on route changes */}
-        {process.env.NODE_ENV === "production" && gtmId && <GtmPageView />}
+        {/* Wrap in Suspense to satisfy Next.js requirement for useSearchParams/usePathname. */}
+        {process.env.NODE_ENV === "production" && gtmId && (
+          <Suspense fallback={null}>
+            <GtmPageView />
+          </Suspense>
+        )}
 
         <LanguageProvider>
           <GoogleMapsProvider>
