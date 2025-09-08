@@ -11,7 +11,8 @@ import "./globals.css"
 
 // GTM
 import Script from "next/script"
-import GtmPageView from "@/components/GtmPageView"
+//import GtmPageView from "@/components/GtmPageView"
+import GtmPageView from "../components/GtmPageView"
 
 const poppins = Poppins({
   subsets: ["latin"],
