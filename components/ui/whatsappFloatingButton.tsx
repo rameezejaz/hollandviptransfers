@@ -28,11 +28,6 @@ export default function WhatsAppFloatingButton() {
       <span className="absolute right-full mr-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
         Chat met ons op WhatsApp
       </span>
-      
-      {/* Notification badge (optional - remove if not needed) */}
-      <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs font-bold animate-pulse">
-        !
-      </span>
     </button>
   )
 }
