@@ -17,6 +17,7 @@ import GtmPageView from "../components/GtmPageView"
 
 // ⬅️ Required to wrap components that use useSearchParams/usePathname
 import { Suspense } from "react"
+import WhatsAppFloatingButton from "@/components/ui/whatsappFloatingButton"
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -97,7 +98,7 @@ export default function RootLayout({
         <LanguageProvider>
           <GoogleMapsProvider>
             <Header />
-            <main className="flex-grow">{children}</main>
+            <main className="flex-grow">{children} <WhatsAppFloatingButton /></main>
             <Footer />
           </GoogleMapsProvider>
         </LanguageProvider>

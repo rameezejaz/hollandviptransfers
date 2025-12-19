@@ -1,4 +1,43 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-<sitemap><loc>https://www.hollandviptransfers.com/sitemap-0.xml</loc></sitemap>
-</sitemapindex>
+<?xml version="1.0" encoding="UTF-8"?> 
+<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9"> 
+<url>
+<loc>https://hollandviptransfers.com/</loc>
+<priority>0.1</priority>
+</url>
+<url>
+<loc>https://hollandviptransfers.com/voertuigen</loc>
+<priority>0.1</priority>
+</url>
+<url>
+<loc>https://hollandviptransfers.com/over-ons</loc>
+<priority>0.1</priority>
+</url>
+<url>
+<loc>https://hollandviptransfers.com/faq</loc>
+<priority>0.1</priority>
+</url>
+<url>
+<loc>https://hollandviptransfers.com/boeken</loc>
+<priority>0.1</priority>
+</url>
+<url>
+<loc>https://hollandviptransfers.com/diensten/luchthaven-transfers</loc>
+<priority>0.1</priority>
+</url>
+<url>
+<loc>https://hollandviptransfers.com/diensten/zakelijk-vervoer</loc>
+<priority>0.1</priority>
+</url>
+<url>
+<loc>https://hollandviptransfers.com/diensten/sightseeing</loc>
+<priority>0.1</priority>
+</url>
+<url>
+<loc>https://hollandviptransfers.com/diensten/touren</loc>
+<priority>0.1</priority>
+</url>
+<loc>https://hollandviptransfers.com/boeken</loc>
+<priority>0.1</priority>
+</url>
+</urlset>
+

@@ -44,6 +44,12 @@ export default function HomeContent() {
       href: "/diensten/touren",
       img: "/images/filler/luxury_tour.jpg",
     },
+    {
+      title: t("home.services.group-events.title"),
+      desc: t("home.services.group-events.desc"),
+      href: "/diensten/group-events",
+      img: "/images/cars/sprinter/front2.jpeg",
+    },
   ]
 
   const howItWorksItems = [

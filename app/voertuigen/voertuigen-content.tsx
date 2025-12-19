@@ -23,12 +23,13 @@ const getTranslatedFleetData = (t: (key: string) => string) => {
       fullDescription: t("fleet.e_class.desc"),
       images: ["/images/cars/e-class/front.jpeg", "/images/cars/e-class/inside.jpeg", "/images/cars/e-class/back.jpeg"],
       prices: {
-        arrival: "€105,-",
-        departure: "€80,-",
-        hourly: "€70,-",
-        dayrate: "€499,-",
-        cityTransfer: "€67,50",
+        arrival: "€100,-",
+        departure: "€100,-",
+        hourly: "€75,-",
+        dayrate: "€550,-",
+        cityTransfer: "€75",
       },
+      showRequestQuote: false,
     },
     {
       id: "s-class",
@@ -51,12 +52,13 @@ const getTranslatedFleetData = (t: (key: string) => string) => {
         "/images/cars/s-class/interieur2.jpeg",
       ],
       prices: {
-        arrival: "€120,-",
-        departure: "€95,-",
-        hourly: "€80,-",
-        dayrate: "€579,-",
-        cityTransfer: "€77,50",
+        arrival: "€110,-",
+        departure: "€110,-",
+        hourly: "€95,-",
+        dayrate: "€700,-",
+        cityTransfer: "€75",
       },
+      showRequestQuote: false,
     },
     {
       id: "v-class",
@@ -69,12 +71,13 @@ const getTranslatedFleetData = (t: (key: string) => string) => {
       fullDescription: t("fleet.v_class.desc"),
       images: ["/images/cars/v-class/front.jpeg", "/images/cars/v-class/side.jpeg"],
       prices: {
-        arrival: "€120,-",
-        departure: "€95,-",
-        hourly: "€80,-",
-        dayrate: "€579,-",
-        cityTransfer: "€77,50",
+        arrival: "€110,-",
+        departure: "€110,-",
+        hourly: "€95,-",
+        dayrate: "€700,-",
+        cityTransfer: "€85",
       },
+      showRequestQuote: false,
     },
     {
       id: "sprinter",
@@ -82,7 +85,7 @@ const getTranslatedFleetData = (t: (key: string) => string) => {
       type: t("fleet.sprinter.type"),
       category: t("fleet.sprinter.type"),
       passengers: "1-28",
-      luggage: 10,
+      luggage: 15,
       shortDescription: t("fleet.sprinter.desc"),
       fullDescription: t("fleet.sprinter.desc"),
       images: [
@@ -92,12 +95,13 @@ const getTranslatedFleetData = (t: (key: string) => string) => {
         "/images/cars/sprinter/interieur.jpeg",
       ],
       prices: {
-        arrival: "€285,-",
-        departure: "€270,-",
-        hourly: "€120,-",
+        arrival: t("offer"),
+        departure: t("offer"),
+        hourly: t("offer"),
         dayrate: t("offer"),
-        cityTransfer: "€225,-",
+        cityTransfer: t("offer"),
       },
+      showRequestQuote: true,
     },
     {
       id: "coach",
@@ -116,12 +120,13 @@ const getTranslatedFleetData = (t: (key: string) => string) => {
 
       ],
       prices: {
-        arrival: "N/A",
-        departure: "N/A",
-        hourly: "N/A",
-        dayrate: "N/A",
-        cityTransfer: "N/A",
+        arrival: t("offer"),
+        departure: t("offer"),
+        hourly: t("offer"),
+        dayrate: t("offer"),
+        cityTransfer: t("offer"),
       },
+      showRequestQuote: true,
     },
   ]
 
@@ -285,7 +290,7 @@ function VehicleDetail({
             {/* Pricing */}
             <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 mb-8">
               <h3 className="text-xl font-bold text-white mb-4">{t("p")}</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {Object.entries(vehicle.prices).map(([key, value]) => (
                   <div key={key} className="bg-gray-950 p-3 rounded-lg border border-gray-800">
                     <p className="text-sm text-gray-400 capitalize">
@@ -304,7 +309,20 @@ function VehicleDetail({
                     <p className="font-bold text-white">{value}</p>
                   </div>
                 ))}
+                
+                {/* Request Quote Button for Sprinter and Coach - as 6th grid item */}
+                {vehicle.showRequestQuote && (
+                  <div className="rounded-lg border border-gray-800">
+                    <Button
+                      asChild
+                      className="w-full bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-semibold hover:from-orange-600 hover:to-yellow-600 py-6 text-base h-full min-h-[80px]"
+                    >
+                      <Link href="/boeken">Request a Quote</Link>
+                    </Button>
+                  </div>
+                )}
               </div>
+              
               <p className="text-xs text-gray-500 mt-4">{t("excl")}</p>
             </div>
 

@@ -76,6 +76,7 @@ export default function Header() {
           label: t("nav.services.sightseeing"),
         },
         { href: "/diensten/touren", label: t("nav.services.touring") },
+        { href: "/diensten/group-events", label: t("nav.services.group-events") },
       ],
     },
     { href: "/voertuigen", label: t("nav.fleet") },
