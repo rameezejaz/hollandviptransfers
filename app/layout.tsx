@@ -8,14 +8,8 @@ import Footer from "@/components/layout/footer"
 import { LanguageProvider } from "@/contexts/language-context"
 import GoogleMapsProvider from "@/components/GoogleMapsProvider"
 import "./globals.css"
-
-// GTM
 import Script from "next/script"
-// Using a relative import is fine; keep this if your alias @/* isn't set up.
-// Make sure the file exists at: /components/GtmPageView.tsx (capital V!)
 import GtmPageView from "../components/GtmPageView"
-
-// ⬅️ Required to wrap components that use useSearchParams/usePathname
 import { Suspense } from "react"
 import WhatsAppFloatingButton from "@/components/ui/whatsappFloatingButton"
 
@@ -50,12 +44,12 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   const gtmId = process.env.NEXT_PUBLIC_GTM_ID
+  const gaId = process.env.NEXT_PUBLIC_GA_ID || "G-S3NHVFZNQS"
 
   return (
     <html lang="nl" className="scroll-smooth">
       <head>
-        {/* Google Tag Manager – main script.
-            Loads after hydration (non-blocking). Only in production if GTM ID present. */}
+        {/* Google Tag Manager */}
         {process.env.NODE_ENV === "production" && gtmId && (
           <Script id="gtm" strategy="afterInteractive">
             {`
@@ -67,8 +61,25 @@ export default function RootLayout({
             `}
           </Script>
         )}
-      </head>
 
+        {/* Google Analytics */}
+        {process.env.NODE_ENV === "production" && gaId && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+              strategy="afterInteractive"
+            />
+            <Script id="google-analytics" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${gaId}');
+              `}
+            </Script>
+          </>
+        )}
+      </head>
       <body
         className={cn(
           "min-h-screen bg-gray-900 font-sans antialiased text-gray-200",
@@ -76,7 +87,7 @@ export default function RootLayout({
           playfair.variable,
         )}
       >
-        {/* Google Tag Manager (noscript) – must be right after <body>. */}
+        {/* Google Tag Manager (noscript) */}
         {process.env.NODE_ENV === "production" && gtmId && (
           <noscript>
             <iframe
@@ -88,7 +99,6 @@ export default function RootLayout({
           </noscript>
         )}
 
-        {/* Wrap in Suspense to satisfy Next.js requirement for useSearchParams/usePathname. */}
         {process.env.NODE_ENV === "production" && gtmId && (
           <Suspense fallback={null}>
             <GtmPageView />
@@ -98,7 +108,10 @@ export default function RootLayout({
         <LanguageProvider>
           <GoogleMapsProvider>
             <Header />
-            <main className="flex-grow">{children} <WhatsAppFloatingButton /></main>
+            <main className="flex-grow">
+              {children}
+              <WhatsAppFloatingButton />
+            </main>
             <Footer />
           </GoogleMapsProvider>
         </LanguageProvider>
