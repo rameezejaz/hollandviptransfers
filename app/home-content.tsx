@@ -77,9 +77,17 @@ export default function HomeContent() {
           loop
           muted
           playsInline
+          preload="auto"
           className="absolute top-0 left-0 w-full h-full object-cover z-0"
-          src="/videos/video.mp4"
-        />
+          src="https://res.cloudinary.com/ddfto86tn/video/upload/v1767107518/video_jqwmew.mp4"
+          // @ts-ignore
+          fetchPriority="high"
+        >
+          <source
+            src="https://res.cloudinary.com/ddfto86tn/video/upload/v1767107518/video_jqwmew.mp4"
+            type="video/mp4"
+          />
+        </video>
         <div className="absolute top-0 left-0 w-full h-full bg-black/60 z-10"></div>
         <div className="relative z-20 container mx-auto px-4">
           <h2 className="text-4xl md:text-6xl font-bold mb-4">

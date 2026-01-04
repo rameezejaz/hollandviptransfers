@@ -125,6 +125,8 @@ export default function Header() {
                 width={isScrolled ? 115 : 150}
                 height={isScrolled ? 60 : 100}
                 className="transition-all duration-300"
+                priority
+                fetchPriority="high"
               />
             </Link>
 
