@@ -706,7 +706,7 @@ export default function BookingContent() {
     <h2 className="sr-only">VIP chauffeursdiensten, luchthaventransfers & zakelijk vervoer — 24/7 beschikbaar</h2>
       <div className="container mx-auto px-4">
         <div ref={fadeInRef} className="text-center mb-16 fade-in-section">
-          <div className="text-5xl md:text-6xl font-bold text-white mb-6">{t("booking.title")}</div>
+          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">{t("booking.title")}</h1>
           <p className="text-xl text-gray-400 max-w-4xl mx-auto leading-relaxed">{t("booking.subtitle")}</p>
         </div>
 
