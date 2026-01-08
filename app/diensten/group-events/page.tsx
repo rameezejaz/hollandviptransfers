@@ -2,9 +2,9 @@ import GroupEventsContent from "./group-events-content"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Groepsevenementen & Busvervoer | Mercedes Sprinter | Holland VIP Transfers",
+  title: "Groeps- en Evenementenvervoer | Betrouwbare Chauffeur- & Groepsreizen",
   description:
-    "Luxe busvervoer voor groepsevenementen. Mercedes Sprinter bussen beschikbaar in 16, 20, 23 en 28 zitplaatsen. Perfect voor bedrijfsuitjes, bruiloften, feesten en tours met professionele chauffeurs.",
+    "Professioneel groepsvervoer voor evenementen, zakenreizen, bruiloften, tours en luchthavenvervoer met luxe voertuigen en ervaren chauffeurs.",
   keywords: [
     "groepsvervoer",
     "busvervoer",
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Groepsevenementen & Luxe Busvervoer | Mercedes Sprinter",
     description:
-      "Luxe busvervoer voor groepsevenementen. Mercedes Sprinter bussen in 16, 20, 23 en 28 zitplaatsen. Perfect voor bedrijfsuitjes, bruiloften en speciale evenementen met ervaren chauffeurs.",
+      "Professioneel groepsvervoer voor evenementen, zakenreizen, bruiloften, tours en luchthavenvervoer met luxe voertuigen en ervaren chauffeurs.",
     type: "website",
     url: "https://hollandviptransfers.com/diensten/group-events",
     siteName: "Holland VIP Transfers",

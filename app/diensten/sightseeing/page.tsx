@@ -4,11 +4,11 @@ import type { Metadata } from "next"
 export const metadata: Metadata = {
   title: "Sightseeing | Privé Luxe Transport Tours",
   description:
-    "Privé sightseeing met luxe transport. Professionele chauffeur service naar Keukenhof, Giethoorn, Zaanse Schans en meer. Boek vandaag een VIP-tour.",
+    "Reis door Nederland met ervaren chauffeurs en luxe voertuigen, en ontdek de topbezienswaardigheden terwijl u geniet van een naadloze en onvergetelijke tourervaring",
   openGraph: {
     title: "Sightseeing | Privé Luxe Transport Tours",
     description:
-      "Privé sightseeing met luxe transport. Professionele chauffeur service naar Keukenhof, Giethoorn, Zaanse Schans. Boek vandaag een VIP-tour.",
+      "Reis door Nederland met ervaren chauffeurs en luxe voertuigen, en ontdek de topbezienswaardigheden terwijl u geniet van een naadloze en onvergetelijke tourervaring",
     type: "website",
     url: "https://hollandviptransfers.com/diensten/sightseeing",
     siteName: "Holland VIP Transfers",

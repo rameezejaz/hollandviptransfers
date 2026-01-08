@@ -4,11 +4,11 @@ import type { Metadata } from "next"
 export const metadata: Metadata = {
   title: "Luxe Voertuigen Holland & Europa | Mercedes VIP & Groepsvervoer",
   description:
-    "Ervaar uw reis in ultiem comfort met onze Mercedes E-Class, S-Class, V-Class, Sprinter en touringcar. Van zakelijke ritten tot groepsreizen en meerdaagse tours.",
+    "Ervaar eersteklas reizen in Nederland met high-end voertuigen, superieure interieurs en professionele standaarden die tot uiting komen in ons luxe wagenpark",
   openGraph: {
     title: "Luxe Voertuigen Holland & Europa | Mercedes VIP & Groepsvervoer",
     description:
-      "Ervaar uw reis in ultiem comfort met onze Mercedes E-Class, S-Class, V-Class, Sprinter en touringcar. Van zakelijke ritten tot groepsreizen en meerdaagse tours.",
+      "Ervaar eersteklas reizen in Nederland met high-end voertuigen, superieure interieurs en professionele standaarden die tot uiting komen in ons luxe wagenpark",
     type: "website",
     url: "https://hollandviptransfers.com/voertuigen",
     siteName: "Holland VIP Transfers",

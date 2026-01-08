@@ -3,7 +3,7 @@ User-agent: *
 Allow: /
 
 # Host
-Host: https://www.hollandviptransfers.com
+Host: https://hollandviptransfers.com
 
 # Sitemaps
-Sitemap: https://www.hollandviptransfers.com/sitemap.xml
+Sitemap: https://hollandviptransfers.com/sitemap.xml

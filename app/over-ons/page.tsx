@@ -4,11 +4,11 @@ import { OverOnsContent } from "./over-ons-content"
 export const metadata: Metadata = {
   title: "Over Holland VIP Transfers | Luxe vervoer & groepsreizen",
   description:
-    "Ontdek Holland VIP Transfers: meer dan 20 jaar ervaring in luxe vervoer, groepsreizen, tours en zakelijke ritten vanuit Amsterdam door heel Nederland en Europa.",
+    "Ontdek onze premium chauffeursnormen, luxe wagenpark en uitmuntende service in Amsterdam, Nederland, en lees wat Holland VIP Transfers onderscheidt.",
   openGraph: {
     title: "Over Holland VIP Transfers | Luxe vervoer & groepsreizen",
     description:
-      "Ontdek Holland VIP Transfers: meer dan 20 jaar ervaring in luxe vervoer, groepsreizen, tours en zakelijke ritten vanuit Amsterdam door heel Nederland en Europa.",
+      "Ontdek onze premium chauffeursnormen, luxe wagenpark en uitmuntende service in Amsterdam, Nederland, en lees wat Holland VIP Transfers onderscheidt.",
     type: "website",
     url: "https://hollandviptransfers.com/over-ons",
     siteName: "Holland VIP Transfers",

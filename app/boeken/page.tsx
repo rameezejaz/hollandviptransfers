@@ -6,11 +6,11 @@ import { Loader2 } from "lucide-react"
 export const metadata: Metadata = {
   title: "Book Your Luxury Transfer - Holland VIP Transfers",
   description:
-    "Book your luxury transport service in Amsterdam, Holland and Europe. Complete our simple 4-step process to request your quote.",
+    "Book your luxury transfer for smooth, comfortable, and reliable travel with professional chauffeurs, ideal for airport, business, and premium journeys.",
   openGraph: {
     title: "Book Your Luxury Transfer - Holland VIP Transfers",
     description:
-      "Book your luxury transport service in Amsterdam, Holland and Europe. Complete our simple 4-step process to request your quote.",
+      "Book your luxury transfer for smooth, comfortable, and reliable travel with professional chauffeurs, ideal for airport, business, and premium journeys.",
     type: "website",
     url: "https://hollandviptransfers.com/booking",
     siteName: "Holland VIP Transfers",
