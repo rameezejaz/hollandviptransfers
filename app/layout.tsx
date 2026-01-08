@@ -44,7 +44,6 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   const gtmId = process.env.NEXT_PUBLIC_GTM_ID
-  const gaId = process.env.NEXT_PUBLIC_GA_ID || "G-S3NHVFZNQS"
 
   return (
     <html lang="nl" className="scroll-smooth">
@@ -60,24 +59,6 @@ export default function RootLayout({
               })(window,document,'script','dataLayer','${gtmId}');
             `}
           </Script>
-        )}
-
-        {/* Google Analytics */}
-        {process.env.NODE_ENV === "production" && gaId && (
-          <>
-            <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
-              strategy="afterInteractive"
-            />
-            <Script id="google-analytics" strategy="afterInteractive">
-              {`
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', '${gaId}');
-              `}
-            </Script>
-          </>
         )}
       </head>
       <body
