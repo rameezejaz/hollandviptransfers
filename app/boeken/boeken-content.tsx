@@ -1924,7 +1924,7 @@ export default function BookingContent() {
                           <div className="relative w-24 h-16 rounded-lg overflow-hidden">
                             <Image
                               src={vehicles.find((v) => v.id === selectedVehicle)?.img || "/placeholder.svg"}
-                              alt={vehicles.find((v) => v.id === selectedVehicle)?.name || ""}
+                              alt={vehicles.find((v) => v.id === selectedVehicle)?.name || "Holland Vip Transfers"}
                               fill
                               className="object-cover"
                             />
