@@ -18,7 +18,7 @@ export default function AnimatedText({ text, className, delay = 0 }: AnimatedTex
   }, [delay])
 
   return (
-    <span className={cn("inline-flex flex-wrap", className)}>
+    <span className={cn("inline-flex flex-wrap justify-center", className)}>
       {text.split(" ").map((word, wordIndex) => (
         <span key={wordIndex} className="flex mr-2">
           {word.split("").map((char, charIndex) => (

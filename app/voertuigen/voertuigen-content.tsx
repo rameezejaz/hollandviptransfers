@@ -317,7 +317,7 @@ function VehicleDetail({
                       asChild
                       className="w-full bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-semibold hover:from-orange-600 hover:to-yellow-600 py-6 text-base h-full min-h-[80px]"
                     >
-                      <Link href="/boeken">Request a Quote</Link>
+                      <Link href="/boeken">Request A Quote</Link>
                     </Button>
                   </div>
                 )}
