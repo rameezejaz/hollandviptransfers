@@ -41,6 +41,31 @@ export default function CorporateEventsContent() {
       question: t("services.corporate.faq.q2.question"),
       answer: t("services.corporate.faq.q2.answer"),
     },
+    {
+      id: "q3",
+      question: t("services.corporate.faq.q3.question"),
+      answer: t("services.corporate.faq.q3.answer"),
+    },
+    {
+      id: "q4",
+      question: t("services.corporate.faq.q4.question"),
+      answer: t("services.corporate.faq.q4.answer"),
+    },
+    {
+      id: "q5",
+      question: t("services.corporate.faq.q5.question"),
+      answer: t("services.corporate.faq.q5.answer"),
+    },
+    {
+      id: "q6",
+      question: t("services.corporate.faq.q6.question"),
+      answer: t("services.corporate.faq.q6.answer"),
+    },
+    {
+      id: "q7",
+      question: t("services.corporate.faq.q7.question"),
+      answer: t("services.corporate.faq.q7.answer"),
+    },
   ]
 
   return (
