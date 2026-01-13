@@ -15,7 +15,7 @@ export function OverOnsContent() {
     en: {
       title: "About Holland VIP Transfers",
       description:
-        "With 20 years of experience, Holland VIP Transfers is a professional transportation service based in Amsterdam. We specialize in group tours, sightseeing, airport transfers, corporate events, and private chauffeur services. Our skilled drivers and modern fleet ensure every journey is comfortable, safe, and memorable.",
+        "With 20 years of experience, Holland VIP Transfers is a trusted transportation service based in Amsterdam. We handle group tours, sightseeing, airport transfers, corporate events, and private rides. From a Private Driver Amsterdam to weddings and business travel, every journey focuses on comfort, timing, and reliable service you can depend on.",
       stats: {
         title: "Our Numbers",
         items: [
@@ -40,7 +40,7 @@ export function OverOnsContent() {
     nl: {
       title: "Over Holland VIP Transfers",
       description:
-        "Met 20 jaar ervaring is Holland VIP Transfers een professionele vervoersdienst gevestigd in Amsterdam. Wij zijn gespecialiseerd in groepstouren, sightseeing, luchthaven transfers, zakelijke ritten en privé chauffeursdiensten. Onze ervaren chauffeurs en moderne wagenpark zorgen ervoor dat elke reis comfortabel, veilig en onvergetelijk is.",
+        "Met 20 jaar ervaring is Holland VIP Transfers een betrouwbare vervoersdienst gevestigd in Amsterdam. Wij verzorgen groepsreizen, sightseeing, luchthaventransfers, zakelijke evenementen en privéritten. Van een Private Driver Amsterdam tot bruiloften en zakelijke reizen: elke rit is gericht op comfort, punctualiteit en betrouwbare service waarop u kunt vertrouwen.",
       stats: {
         title: "Onze Cijfers",
         items: [
