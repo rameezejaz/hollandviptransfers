@@ -47,6 +47,16 @@ export default function FaqContent() {
     { id: "q25", question: t("faq.q25.question"), answer: t("faq.q25.answer"), category: "booking" },
     { id: "q26", question: t("faq.q26.question"), answer: t("faq.q26.answer"), category: "booking" },
     { id: "q27", question: t("faq.q27.question"), answer: t("faq.q27.answer"), category: "booking" },
+    { id: "q28", question: t("faq.q28.question"), answer: t("faq.q28.answer"), category: "general" },
+    { id: "q29", question: t("faq.q29.question"), answer: t("faq.q29.answer"), category: "general" },
+    { id: "q30", question: t("faq.q30.question"), answer: t("faq.q30.answer"), category: "general" },
+    { id: "q31", question: t("faq.q31.question"), answer: t("faq.q31.answer"), category: "general" },
+    { id: "q32", question: t("faq.q32.question"), answer: t("faq.q32.answer"), category: "general" },
+    { id: "q33", question: t("faq.q33.question"), answer: t("faq.q33.answer"), category: "general" },
+    { id: "q34", question: t("faq.q34.question"), answer: t("faq.q34.answer"), category: "general" },
+    { id: "q35", question: t("faq.q35.question"), answer: t("faq.q35.answer"), category: "general" },
+    { id: "q36", question: t("faq.q36.question"), answer: t("faq.q36.answer"), category: "general" },
+    { id: "q37", question: t("faq.q37.question"), answer: t("faq.q37.answer"), category: "general" },
   ]
 
   const filteredFaqs = activeFilter === "all" ? faqItems : faqItems.filter((faq) => faq.category === activeFilter)
