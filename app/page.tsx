@@ -37,10 +37,62 @@ export const metadata: Metadata = {
     url: "https://hollandviptransfers.com",
     siteName: "Holland VIP Transfers",
     images: ["/images/logo.png"],
-
   },
 }
 
 export default function HomePage() {
-  return <HomeContent />
+  const schemaData = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "@id": "https://hollandviptransfers.com/#localbusiness",
+    "name": "Holland VIP Transfers",
+    "url": "https://hollandviptransfers.com/",
+    "logo": "https://hollandviptransfers.com/images/logo2.png",
+    "image": "https://hollandviptransfers.com/images/logo2.png",
+    "email": "info@hollandviptransfer.com",
+    "telephone": "+31 20 308 60 43",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Amsterdam",
+      "addressLocality": "Amsterdam",
+      "addressCountry": "NL"
+    },
+    "geo": {
+      "@type": "GeoCoordinates"
+    },
+    "sameAs": [
+      "https://hollandviptransfers.com/"
+    ],
+    "openingHoursSpecification": {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday"
+      ],
+      "opens": "00:00",
+      "closes": "23:59"
+    },
+    "priceRange": "$$$",
+    "areaServed": {
+      "@type": "Country",
+      "name": "Netherlands"
+    },
+    "hasMap": "https://share.google/sjWPiU3cBGjlaELs0",
+    "description": "Holland VIP Transfers offers luxury chauffeur services, airport transfers, corporate transportation, private tours, and VIP travel solutions across Amsterdam and the Netherlands with professional drivers and premium vehicles."
+  }
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+      />
+      <HomeContent />
+    </>
+  )
 }
