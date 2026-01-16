@@ -177,7 +177,7 @@ export default function HomeContent() {
       <section ref={fadeInRef} className="py-20 md:py-28 bg-gray-950 fade-in-section">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-white">{t("home.how_it_works.title")}</h2>
-          <p className="text-center text-gray-400 mb-16">{t("home.hero.subtitle")}</p>
+          <p className="text-center text-gray-400 mb-16">{t("home.how_it_works.subtitle")}</p>
 
           <div className="max-w-6xl mx-auto">
             <div className="relative">
