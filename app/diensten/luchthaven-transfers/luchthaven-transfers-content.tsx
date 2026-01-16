@@ -135,7 +135,7 @@ export default function AirportTransfersContent() {
                   asChild
                   className="bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold hover:from-orange-600 hover:to-yellow-600"
                 >
-                  <Link href="/boeken">{t("nav.booking")}</Link>
+                  <Link href="/boeken">{t("nav.booking.airport")}</Link>
                 </Button>
               </div>
             </div>

@@ -15,7 +15,7 @@ export function OverOnsContent() {
     en: {
       title: "About Holland VIP Transfers",
       description:
-        "With 20 years of experience, Holland VIP Transfers is a trusted transportation service based in Amsterdam. We handle group tours, sightseeing, airport transfers, corporate events, and private rides. From a Private Driver Amsterdam to weddings and business travel, every journey focuses on comfort, timing, and reliable service you can depend on.",
+        "Holland VIP Transfers is the best luxury transportation company in Amsterdam, with 20 years of reliable experience. We guarantee comfort, privacy, and being on time for every trip with our professional private chauffeur services. We offer seamless Airport Car Service and car service to and from Amsterdam Airport, so you can relax when you arrive or leave. Our Amsterdam Countryside Tour is perfect for travelers who like elegance and local charm. It will show you the beautiful countryside. Our Luxury Airport Service offers stylish, on-time transfers for those who want the most convenience. We also have international options, like Car Rental Milan Linate Airport, that give you more freedom and better travel experiences no matter where your trip takes you.",
       stats: {
         title: "Our Numbers",
         items: [
@@ -40,7 +40,7 @@ export function OverOnsContent() {
     nl: {
       title: "Over Holland VIP Transfers",
       description:
-        "Met 20 jaar ervaring is Holland VIP Transfers een betrouwbare vervoersdienst gevestigd in Amsterdam. Wij verzorgen groepsreizen, sightseeing, luchthaventransfers, zakelijke evenementen en privéritten. Van een Private Driver Amsterdam tot bruiloften en zakelijke reizen: elke rit is gericht op comfort, punctualiteit en betrouwbare service waarop u kunt vertrouwen.",
+        "Holland VIP Transfers is het beste luxe vervoersbedrijf in Amsterdam, met 20 jaar betrouwbare ervaring. Wij garanderen comfort, privacy en stiptheid voor elke rit met onze professionele private chauffeur-diensten. Wij bieden naadloze Airport Car Service en car service van en naar Amsterdam Airport, zodat u volledig kunt ontspannen bij aankomst of vertrek. Onze Amsterdam Countryside Tour is perfect voor reizigers die houden van elegantie en lokale charme en laat u het prachtige platteland zien. Onze Luxury Airport Service biedt stijlvolle, tijdige transfers voor wie het maximale gemak wil. We hebben ook internationale opties, zoals Car Rental Milan Linate Airport, voor meer vrijheid en betere reiservaringen, waar uw reis u ook brengt.",
       stats: {
         title: "Onze Cijfers",
         items: [
