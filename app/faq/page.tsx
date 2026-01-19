@@ -2,11 +2,11 @@ import FaqContent from "./faq-content"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Veelgestelde Vragen Luxe Vervoer Holland & Europa | Holland VIP Transfers",
+  title: "Veelgestelde Vragen Luxe Vervoer NL & Europa | Holland VIP Transfers",
   description:
     "Ontdek veelgestelde vragen over reizen in Amsterdam, Nederland, en vind handige tips voor luchthavenvervoer, tours en zakelijke reizen.",
   openGraph: {
-    title: "Veelgestelde Vragen Luxe Vervoer Holland & Europa | Holland VIP Transfers",
+    title: "Veelgestelde Vragen Luxe Vervoer NL & Europa | Holland VIP Transfers",
     description:
       "Ontdek veelgestelde vragen over reizen in Amsterdam, Nederland, en vind handige tips voor luchthavenvervoer, tours en zakelijke reizen.",
     type: "website",

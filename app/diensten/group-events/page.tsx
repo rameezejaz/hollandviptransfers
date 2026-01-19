@@ -2,7 +2,7 @@ import GroupEventsContent from "./group-events-content"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Groeps- en Evenementenvervoer | Betrouwbare Chauffeur- & Groepsreizen",
+  title: "Groeps- & Evenementenvervoer | Betrouwbare Chauffeur- & Groepsreizen",
   description:
     "Professioneel groepsvervoer voor evenementen, zakenreizen, bruiloften, tours en luchthavenvervoer met luxe voertuigen en ervaren chauffeurs.",
   keywords: [
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     "luxe busvervoer"
   ],
   openGraph: {
-    title: "Groepsevenementen & Luxe Busvervoer | Mercedes Sprinter",
+    title: "Groeps- & Evenementenvervoer | Betrouwbare Chauffeur- & Groepsreizen",
     description:
       "Professioneel groepsvervoer voor evenementen, zakenreizen, bruiloften, tours en luchthavenvervoer met luxe voertuigen en ervaren chauffeurs.",
     type: "website",
