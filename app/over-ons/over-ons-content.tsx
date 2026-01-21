@@ -15,7 +15,7 @@ export function OverOnsContent() {
     en: {
       title: "About Holland VIP Transfers",
       description:
-        "Holland VIP Transfers is the best luxury transportation company in Amsterdam, with 20 years of reliable experience. We guarantee comfort, privacy, and being on time for every trip with our professional private chauffeur services. We offer seamless Airport Car Service and car service to and from Amsterdam Airport, so you can relax when you arrive or leave. Our Amsterdam Countryside Tour is perfect for travelers who like elegance and local charm. It will show you the beautiful countryside. Our Luxury Airport Service offers stylish, on-time transfers for those who want the most convenience. We also have international options, like Car Rental Milan Linate Airport, that give you more freedom and better travel experiences no matter where your trip takes you.",
+        "<a href='https://hollandviptransfers.com/' style='text-decoration: underline;'>Holland VIP Transfers</a> is the best luxury transportation company in Amsterdam, with 20 years of reliable experience. We guarantee comfort, privacy, and being on time for every trip with our professional private chauffeur services. We offer seamless <a href='https://hollandviptransfers.com/diensten/zakelijk-vervoer' style='text-decoration: underline;'>Airport Car Service</a> and car service to and from Amsterdam Airport, so you can relax when you arrive or leave. Our Amsterdam Countryside Tour is perfect for travelers who like elegance and local charm. It will show you the beautiful countryside. Our <a href='https://hollandviptransfers.com/diensten/luchthaven-transfers' style='text-decoration: underline;'>Luxury Airport Service</a> offers stylish, on-time transfers for those who want the most convenience. We also have international options, like Car Rental Milan Linate Airport, that give you more freedom and better travel experiences no matter where your trip takes you.",
       stats: {
         title: "Our Numbers",
         items: [
@@ -40,7 +40,7 @@ export function OverOnsContent() {
     nl: {
       title: "Over Holland VIP Transfers",
       description:
-        "Holland VIP Transfers is het beste luxe vervoersbedrijf in Amsterdam, met 20 jaar betrouwbare ervaring. Wij garanderen comfort, privacy en stiptheid voor elke rit met onze professionele private chauffeur-diensten. Wij bieden naadloze Airport Car Service en car service van en naar Amsterdam Airport, zodat u volledig kunt ontspannen bij aankomst of vertrek. Onze Amsterdam Countryside Tour is perfect voor reizigers die houden van elegantie en lokale charme en laat u het prachtige platteland zien. Onze Luxury Airport Service biedt stijlvolle, tijdige transfers voor wie het maximale gemak wil. We hebben ook internationale opties, zoals Car Rental Milan Linate Airport, voor meer vrijheid en betere reiservaringen, waar uw reis u ook brengt.",
+        "<a href='https://hollandviptransfers.com/' style='text-decoration: underline;'>Holland VIP Transfers</a> is het beste luxe vervoersbedrijf in Amsterdam, met 20 jaar betrouwbare ervaring. Wij garanderen comfort, privacy en stiptheid voor elke rit met onze professionele private chauffeur-diensten. Wij bieden naadloze <a href='https://hollandviptransfers.com/diensten/zakelijk-vervoer' style='text-decoration: underline;'>Airport Car Service</a> en car service van en naar Amsterdam Airport, zodat u volledig kunt ontspannen bij aankomst of vertrek. Onze Amsterdam Countryside Tour is perfect voor reizigers die houden van elegantie en lokale charme en laat u het prachtige platteland zien. Onze <a href='https://hollandviptransfers.com/diensten/luchthaven-transfers' style='text-decoration: underline;'>Luxury Airport Service</a> biedt stijlvolle, tijdige transfers voor wie het maximale gemak wil. We hebben ook internationale opties, zoals Car Rental Milan Linate Airport, voor meer vrijheid en betere reiservaringen, waar uw reis u ook brengt.",
       stats: {
         title: "Onze Cijfers",
         items: [
@@ -80,7 +80,7 @@ export function OverOnsContent() {
           {/* Main Content - Photo Right, Text Left */}
           <div className="grid lg:grid-cols-2 gap-12 items-center mb-20">
             <div {...fadeIn}>
-              <p className="text-lg text-gray-300 leading-relaxed mb-8">{t.description}</p>
+              <p className="text-lg text-gray-300 leading-relaxed mb-8" dangerouslySetInnerHTML={{ __html: t.description }}></p>
             </div>
             <div {...fadeIn}>
               <div className="relative h-96 rounded-2xl overflow-hidden">

@@ -285,7 +285,7 @@ function VehicleDetail({
               </div>
             </div>
 
-            <p className="text-lg text-gray-300 leading-relaxed mb-8">{vehicle.fullDescription}</p>
+            <p className="text-lg text-gray-300 leading-relaxed mb-8" dangerouslySetInnerHTML={{ __html: vehicle.fullDescription }}></p>
 
             {/* Pricing */}
             <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 mb-8">
@@ -426,7 +426,7 @@ function FleetOverview({
                   </div>
                 </div>
 
-                <p className="text-gray-400 text-sm leading-relaxed mb-4">{vehicle.shortDescription}</p>
+                <p className="text-gray-400 text-sm leading-relaxed mb-4" dangerouslySetInnerHTML={{ __html: vehicle.shortDescription }}></p>
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1">

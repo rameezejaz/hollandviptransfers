@@ -128,7 +128,7 @@ export default function CorporateEventsContent() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
               <h2 className="text-4xl md:text-5xl font-bold text-white mb-8">{t("services.corporate.hero.title")}</h2>
-              <p className="text-lg text-gray-300 leading-relaxed mb-8">{t("services.corporate.hero.description")}</p>
+              <p className="text-lg text-gray-300 leading-relaxed mb-8" dangerouslySetInnerHTML={{ __html: t("services.corporate.hero.description") }}></p>
               <div className="flex justify-center lg:justify-start">
                 <Button
                   asChild
@@ -194,7 +194,7 @@ export default function CorporateEventsContent() {
                     {faq.question}
                   </AccordionTrigger>
                   <AccordionContent className="text-gray-400 pb-8 text-lg leading-relaxed">
-                    {faq.answer}
+                    <p dangerouslySetInnerHTML={{ __html: faq.answer }}></p>
                   </AccordionContent>
                 </AccordionItem>
               ))}

@@ -40,7 +40,7 @@ export default function Footer() {
             <Link href="/" className="flex items-center gap-2">
               <Image src="/favicon.ico" alt="Holland VIP Transfers Logo" width={150} height={100} />
             </Link>
-            <p className="text-sm">{t("home.footer.subtitle")}</p>
+            <p className="text-sm" dangerouslySetInnerHTML={{ __html: t("home.footer.subtitle") }}></p>
             
             {/* Social Media Links */}
             <div className="flex items-center gap-3 pt-2">

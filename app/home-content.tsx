@@ -132,7 +132,7 @@ export default function HomeContent() {
                   </div>
                 </div>
                 <h3 className="text-xl font-bold mb-2 text-white">{item.title}</h3>
-                <p className="text-gray-400">{item.desc}</p>
+                <p className="text-gray-400" dangerouslySetInnerHTML={{ __html: item.desc }}></p>
               </div>
             ))}
           </div>

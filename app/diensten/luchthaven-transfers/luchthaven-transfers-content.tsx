@@ -95,8 +95,7 @@ export default function AirportTransfersContent() {
               {t("services.airport.subtitle")}
             </h2>
 
-            <p className="text-xl md:text-2xl text-gray-300 mb-12 leading-relaxed">
-              {t("services.airport.description")}
+            <p className="text-xl md:text-2xl text-gray-300 mb-12 leading-relaxed" dangerouslySetInnerHTML={{ __html: t("services.airport.description") }}>
             </p>
 
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
@@ -129,7 +128,7 @@ export default function AirportTransfersContent() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
               <h2 className="text-4xl md:text-5xl font-bold text-white mb-8">{t("services.airport.hero.title")}</h2>
-              <p className="text-lg text-gray-300 leading-relaxed mb-8">{t("services.airport.hero.description")}</p>
+              <p className="text-lg text-gray-300 leading-relaxed mb-8" dangerouslySetInnerHTML={{ __html: t("services.airport.hero.description") }}></p>
               <div className="flex justify-center lg:justify-start">
                 <Button
                   asChild
@@ -195,7 +194,7 @@ export default function AirportTransfersContent() {
                     {faq.question}
                   </AccordionTrigger>
                   <AccordionContent className="text-gray-400 pb-8 text-lg leading-relaxed">
-                    {faq.answer}
+                    <p dangerouslySetInnerHTML={{ __html: faq.answer }}></p>
                   </AccordionContent>
                 </AccordionItem>
               ))}
@@ -211,7 +210,7 @@ export default function AirportTransfersContent() {
       >
         <div className="container mx-auto px-4 text-center">
           <h3 className="text-3xl md:text-4xl font-bold text-white mb-6">{t("ready.airport")}</h3>
-          <p className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto">{t("ready.airport.desc")}</p>
+          <p className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto" dangerouslySetInnerHTML={{ __html: t("ready.airport.desc") }}></p>
           <Button
             asChild
             size="lg"

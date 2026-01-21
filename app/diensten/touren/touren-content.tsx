@@ -155,7 +155,7 @@ export default function TouringContent() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
               <h2 className="text-4xl md:text-5xl font-bold text-white mb-8">{t("services.touring.hero.title")}</h2>
-              <p className="text-lg text-gray-300 leading-relaxed mb-8">{t("services.touring.hero.description")}</p>
+              <p className="text-lg text-gray-300 leading-relaxed mb-8" dangerouslySetInnerHTML={{ __html: t("services.touring.hero.description") }}></p>
               <div className="flex justify-center lg:justify-start">
                 <Button
                   asChild

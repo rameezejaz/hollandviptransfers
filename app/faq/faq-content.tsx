@@ -115,7 +115,9 @@ export default function FaqContent() {
                 <AccordionTrigger className="text-left text-white hover:text-orange-400 py-6">
                   {faq.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-gray-400 pb-6">{faq.answer}</AccordionContent>
+                <AccordionContent className="text-gray-400 pb-6">
+                  <p dangerouslySetInnerHTML={{ __html: faq.answer }}></p>
+                </AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>
