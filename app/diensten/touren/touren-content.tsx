@@ -260,7 +260,7 @@ export default function TouringContent() {
                     {faq.question}
                   </AccordionTrigger>
                   <AccordionContent className="text-gray-400 pb-8 text-lg leading-relaxed">
-                    {faq.answer}
+                    <p dangerouslySetInnerHTML={{ __html: faq.answer }}></p>
                   </AccordionContent>
                 </AccordionItem>
               ))}

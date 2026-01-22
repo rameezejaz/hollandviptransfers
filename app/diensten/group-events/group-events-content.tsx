@@ -277,9 +277,7 @@ export default function GroupEventsContent() {
                   {t(bus.nameKey)}
                 </h3>
 
-                <p className="text-lg text-gray-300 leading-relaxed mb-8">
-                  {t(bus.descriptionKey)}
-                </p>
+                <p className="text-lg text-gray-300 leading-relaxed mb-8" dangerouslySetInnerHTML={{ __html: t(bus.descriptionKey) }}></p>
 
                 {/* Features Grid */}
                 <div className="grid grid-cols-2 gap-4 mb-8">
