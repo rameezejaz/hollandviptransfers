@@ -3,16 +3,22 @@ import type { Metadata } from "next"
 import { Suspense } from "react"
 import { Loader2 } from "lucide-react"
 
+
 export const metadata: Metadata = {
   title: "Book Your Luxury Transfer - Holland VIP Transfers",
   description:
     "Book your luxury transfer for smooth, comfortable, and reliable travel with professional chauffeurs, ideal for airport, business, and premium journeys.",
+
+  alternates: {
+    canonical: "/boeken",
+  },
+
   openGraph: {
     title: "Book Your Luxury Transfer - Holland VIP Transfers",
     description:
       "Book your luxury transfer for smooth, comfortable, and reliable travel with professional chauffeurs, ideal for airport, business, and premium journeys.",
     type: "website",
-    url: "https://hollandviptransfers.com/booking",
+    url: "https://hollandviptransfers.com/boeken",
     siteName: "Holland VIP Transfers",
   },
 }
