@@ -25,9 +25,12 @@ const playfair = Playfair_Display({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://hollandviptransfers.com"),
+
   title: "Holland VIP Transfers - Luxe Vervoer Holland & Europa",
   description:
     "Holland VIP Transfers biedt luxe vervoer in Amsterdam, Nederland en Europa. Geniet van een eersteklas chauffeursdienst voor luchthaven transfers, zakelijk vervoer en sightseeing met onze Mercedes V-Klasse, Sprinter of minicoach.",
+
   openGraph: {
     title: "Holland VIP Transfers - Luxe Vervoer Holland & Europa",
     description:

@@ -9,6 +9,22 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-}
 
-export default nextConfig
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'www.hollandviptransfers.com',
+          },
+        ],
+        destination: 'https://hollandviptransfers.com/:path*',
+        permanent: true,
+      },
+    ];
+  },
+};
+
+export default nextConfig;
