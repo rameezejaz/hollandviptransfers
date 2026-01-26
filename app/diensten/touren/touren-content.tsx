@@ -131,7 +131,7 @@ export default function TouringContent() {
                 size="lg"
                 className="bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold hover:from-orange-600 hover:to-yellow-600 text-lg px-8 py-6"
               >
-                <Link href="/boeken?rideType=hourly&serviceType=touring">{t("plan.tour")}</Link>
+                <Link href="/boeken">{t("plan.tour")}</Link>
               </Button>
               <Button
                 asChild
@@ -161,7 +161,7 @@ export default function TouringContent() {
                   asChild
                   className="bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold hover:from-orange-600 hover:to-yellow-600"
                 >
-                  <Link href="/boeken?rideType=hourly&serviceType=touring">{t("plan.tour")}</Link>
+                  <Link href="/boeken">{t("plan.tour")}</Link>
                 </Button>
               </div>
             </div>
@@ -229,7 +229,7 @@ export default function TouringContent() {
                     variant="outline"
                     className="w-full border-orange-500 text-orange-400 hover:bg-orange-500/10 bg-transparent mt-auto"
                   >
-                    <Link href={`/boeken?rideType=hourly&serviceType=touring&touringPlan=${destination.tourPlan}`}>
+                    <Link href={`/boeken`}>
                       {t("nav.booking")}
                     </Link>
                   </Button>
@@ -282,7 +282,7 @@ export default function TouringContent() {
             size="lg"
             className="bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold hover:from-orange-600 hover:to-yellow-600 text-lg px-8 py-6"
           >
-            <Link href="/boeken?rideType=hourly&serviceType=touring">{t("plan.tour")}</Link>
+            <Link href="/boeken">{t("plan.tour")}</Link>
           </Button>
         </div>
       </section>

@@ -358,7 +358,7 @@ function VehicleDetail({
               size="lg"
               className="w-full bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold hover:from-orange-600 hover:to-yellow-600 text-lg py-6"
             >
-              <Link href={`/boeken?vehicle=${vehicle.id}`}>{t("book.vehicle")}</Link>
+              <Link href={`/boeken`}>{t("book.vehicle")}</Link>
             </Button>
           </div>
         </div>
