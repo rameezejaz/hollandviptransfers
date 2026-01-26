@@ -164,7 +164,7 @@ export default function GroupEventsContent() {
                 size="lg"
                 className="bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold hover:from-orange-600 hover:to-yellow-600 text-lg px-8 py-6"
               >
-                <Link href="/boeken?rideType=hourly&serviceType=group-events">
+                <Link href="/boeken">
                   {t('groupEvents.hero.ctaPrimary')}
                 </Link>
               </Button>
@@ -300,7 +300,7 @@ export default function GroupEventsContent() {
                     size="lg"
                     className="bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold hover:from-orange-600 hover:to-yellow-600"
                   >
-                    <Link href={`/boeken?rideType=hourly&serviceType=group-events&busType=${bus.seater}-seater`}>
+                    <Link href={`/boeken`}>
                       {t('groupEvents.bookThisBus')}
                     </Link>
                   </Button>
@@ -336,7 +336,7 @@ export default function GroupEventsContent() {
             size="lg"
             className="bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold hover:from-orange-600 hover:to-yellow-600 text-lg px-8 py-6"
           >
-            <Link href="/boeken?rideType=hourly&serviceType=touring">
+            <Link href="/boeken">
               {t('groupEvents.cta.button')}
             </Link>
           </Button>

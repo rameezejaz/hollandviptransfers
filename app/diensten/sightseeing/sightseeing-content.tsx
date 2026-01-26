@@ -212,7 +212,7 @@ export default function SightseeingContent() {
                   asChild
                   className="bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold hover:from-orange-600 hover:to-yellow-600"
                 >
-                  <Link href="/boeken?rideType=hourly&serviceType=sightseeing">{t("plan.sightseeing")}</Link>
+                  <Link href="/boeken">{t("plan.sightseeing")}</Link>
                 </Button>
               </div>
             </div>
@@ -331,7 +331,7 @@ export default function SightseeingContent() {
             size="lg"
             className="bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold hover:from-orange-600 hover:to-yellow-600 text-lg px-8 py-6"
           >
-            <Link href="/boeken?rideType=hourly&serviceType=sightseeing">{t("sight3")}</Link>
+            <Link href="/boeken">{t("sight3")}</Link>
           </Button>
         </div>
       </section>

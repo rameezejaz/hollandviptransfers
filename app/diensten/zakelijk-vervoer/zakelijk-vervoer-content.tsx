@@ -104,7 +104,7 @@ export default function CorporateEventsContent() {
                 size="lg"
                 className="bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold hover:from-orange-600 hover:to-yellow-600 text-lg px-8 py-6"
               >
-                <Link href="/boeken?rideType=hourly&serviceType=corporate">{t("services.coorperate.book")}</Link>
+                <Link href="/boeken">{t("services.coorperate.book")}</Link>
               </Button>
               <Button
                 asChild
@@ -134,7 +134,7 @@ export default function CorporateEventsContent() {
                   asChild
                   className="bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold hover:from-orange-600 hover:to-yellow-600"
                 >
-                  <Link href="/boeken?rideType=hourly&serviceType=corporate">{t("services.coorperate.book")}</Link>
+                  <Link href="/boeken">{t("services.coorperate.book")}</Link>
                 </Button>
               </div>
             </div>
@@ -216,7 +216,7 @@ export default function CorporateEventsContent() {
             size="lg"
             className="bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold hover:from-orange-600 hover:to-yellow-600 text-lg px-8 py-6"
           >
-            <Link href="/boeken?rideType=hourly&serviceType=corporate">{t("services.coorperate.book")}</Link>
+            <Link href="/boeken">{t("services.coorperate.book")}</Link>
           </Button>
         </div>
       </section>
