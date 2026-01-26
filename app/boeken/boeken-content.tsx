@@ -702,8 +702,6 @@ export default function BookingContent() {
 
   return (
     <div className="min-h-screen bg-gray-950 py-12 md:py-20">
-    <h1 className="sr-only">Luxe Vervoer Amsterdam Boeken | Vraag Direct Offerte Aan</h1>
-    <h2 className="sr-only">VIP chauffeursdiensten, luchthaventransfers & zakelijk vervoer — 24/7 beschikbaar</h2>
       <div className="container mx-auto px-4">
         <div ref={fadeInRef} className="text-center mb-16 fade-in-section">
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">{t("booking.title")}</h1>
@@ -764,7 +762,7 @@ export default function BookingContent() {
                {/* Step 1: Choose Vehicle */}
               <div className={cn("transition-all duration-500", step !== 1 && "hidden")}>
                 <div className="p-8 md:p-12">
-                  <h3 className="text-3xl font-bold mb-8 text-white">{t("booking.step2.title")}</h3>
+                  <h2 className="text-3xl font-bold mb-8 text-white">{t("booking.step2.title")}</h2>
                   {preSelectedVehicle && (
                     <div className="mb-8 p-4 bg-orange-500/10 border border-orange-500/30 rounded-xl">
                       <p className="text-orange-400 text-center">
