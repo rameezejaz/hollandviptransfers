@@ -146,15 +146,6 @@ export default function SightseeingContent() {
     },
   ]
 
-  const createBookingUrl = (location: any) => {
-    const params = new URLSearchParams({
-      rideType: "hourly",
-      serviceType: "sightseeing",
-      sightseeingLoc: encodeURIComponent(location.bookingName),
-    })
-    return `/boeken?${params.toString()}`
-  }
-
   return (
     <div className="min-h-screen bg-gray-950">
       {/* Hero Section */}
@@ -279,7 +270,7 @@ export default function SightseeingContent() {
                       size="sm"
                       className="w-full bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white font-medium"
                     >
-                      <Link href={createBookingUrl(location)}>{t("nav.booking")}</Link>
+                      <Link href="/boeken">{t("nav.booking")}</Link>
                     </Button>
                   </div>
                 </div>
