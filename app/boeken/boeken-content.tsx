@@ -289,6 +289,7 @@ export default function BookingContent() {
   const [step, setStep] = useState(1)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const fadeInRef = useFadeIn()
   const searchParams = useSearchParams()
   const preSelectedVehicle = searchParams.get("vehicle")
   const { language } = useLanguage()
@@ -701,9 +702,11 @@ export default function BookingContent() {
 
   return (
     <div className="min-h-screen bg-gray-950 py-12 md:py-20">
+      <h1 className="sr-only">Luxe Vervoer Amsterdam Boeken | Vraag Direct Offerte Aan</h1>
+      <h2 className="sr-only">VIP chauffeursdiensten, luchthaventransfers & zakelijk vervoer — 24/7 beschikbaar</h2>
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">{t("booking.title")}</h1>
+        <div ref={fadeInRef} className="text-center mb-16 fade-in-section">
+          <h2 className="text-5xl md:text-6xl font-bold text-white mb-6">{t("booking.title")}</h2>
           <p className="text-xl text-gray-400 max-w-4xl mx-auto leading-relaxed">{t("booking.subtitle")}</p>
         </div>
 
