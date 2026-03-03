@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useForm, Controller, SubmitHandler } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { cn } from "@/lib/utils"
@@ -14,7 +14,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { useFadeIn } from "@/hooks/use-fade-in"
 import Image from "next/image"
-import { startTransition } from 'react'
 import {
   Check,
   Home,
@@ -29,6 +28,8 @@ import {
   Car,
   Luggage,
   Loader2,
+  CreditCard,
+  Send,
 } from "lucide-react"
 import Link from "next/link"
 import { useLanguage } from "@/contexts/language-context"
@@ -106,7 +107,8 @@ const fullSchema = z
   })
   .refine(
     (data) =>
-      data.rideType === "hourly" && (data.serviceType === "corporate" || data.serviceType === "stand-by" || data.serviceType === "groups-events")
+      data.rideType === "hourly" &&
+      (data.serviceType === "corporate" || data.serviceType === "stand-by" || data.serviceType === "groups-events")
         ? !!data.hours && data.hours >= 3
         : true,
     {
@@ -241,11 +243,13 @@ const routePricing = {
   "Amsterdam-Dusseldorf": { eClass: 570, vClass: 670, sClass: 670 },
 }
 type RouteKey = keyof typeof routePricing
-const hourlyPricing = {
+
+const hourlyPricing: Record<string, number> = {
   "e-class": 75,
   "s-class": 95,
   "v-class": 95,
 }
+
 const locationOptions = [
   "Amsterdam",
   "Schiphol airport",
@@ -270,18 +274,15 @@ const locationOptions = [
   "Dusseldorf",
 ]
 
-// Generate time slots (15-minute intervals)
 const generateTimeSlots = () => {
   const slots = []
   for (let hour = 0; hour < 24; hour++) {
     for (let minute = 0; minute < 60; minute += 30) {
-      const timeString = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`
-      slots.push(timeString)
+      slots.push(`${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`)
     }
   }
   return slots
 }
-
 const timeSlots = generateTimeSlots()
 
 export default function BookingContent() {
@@ -289,16 +290,16 @@ export default function BookingContent() {
   const [step, setStep] = useState(1)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isRedirectingToStripe, setIsRedirectingToStripe] = useState(false)
   const fadeInRef = useFadeIn()
   const searchParams = useSearchParams()
   const preSelectedVehicle = searchParams.get("vehicle")
+  const wasCancelled = searchParams.get("cancelled") === "true"
   const { language } = useLanguage()
 
-  // Get today's date for minimum date validation
   const today = new Date()
   const minDate = today.toISOString().split("T")[0]
 
-  
   const form = useForm<FormData>({
     resolver: zodResolver(fullSchema),
     mode: "onChange",
@@ -315,7 +316,7 @@ export default function BookingContent() {
       from: "",
       to: "",
       customFrom: "",
-      customTo: "", 
+      customTo: "",
       returnFrom: "",
       returnTo: "",
       customReturnFrom: "",
@@ -337,6 +338,7 @@ export default function BookingContent() {
       sprinterCapacity: "",
     },
   })
+
   const {
     control,
     handleSubmit,
@@ -346,17 +348,24 @@ export default function BookingContent() {
     setValue,
     formState: { errors },
   } = form
+
   const [showVehicleNotification, setShowVehicleNotification] = useState(false)
+  const [showCancelledNotification, setShowCancelledNotification] = useState(wasCancelled)
 
   useEffect(() => {
     if (preSelectedVehicle) {
       setShowVehicleNotification(true)
-      const timer = setTimeout(() => {
-        setShowVehicleNotification(false)
-      }, 5000)
+      const timer = setTimeout(() => setShowVehicleNotification(false), 5000)
       return () => clearTimeout(timer)
     }
   }, [preSelectedVehicle])
+
+  useEffect(() => {
+    if (wasCancelled) {
+      const timer = setTimeout(() => setShowCancelledNotification(false), 6000)
+      return () => clearTimeout(timer)
+    }
+  }, [wasCancelled])
 
   useEffect(() => {
     try {
@@ -369,15 +378,9 @@ export default function BookingContent() {
       if (rideType && ["one_way", "round_trip", "hourly"].includes(rideType)) {
         setValue("rideType", rideType as "one_way" | "round_trip" | "hourly")
       }
-      if (serviceType) {
-        setValue("serviceType", serviceType)
-      }
-      if (sightseeingLoc) {
-        setValue("sightseeingLoc", decodeURIComponent(sightseeingLoc))
-      }
-      if (touringPlan) {
-        setValue("touringPlan", touringPlan)
-      }
+      if (serviceType) setValue("serviceType", serviceType)
+      if (sightseeingLoc) setValue("sightseeingLoc", decodeURIComponent(sightseeingLoc))
+      if (touringPlan) setValue("touringPlan", touringPlan)
     } catch (error) {
       console.error("Error parsing URL parameters:", error)
     }
@@ -388,10 +391,8 @@ export default function BookingContent() {
   const serviceType = watch("serviceType")
   const from = watch("from")
   const to = watch("to")
-  const customFrom = watch("customFrom") 
+  const customFrom = watch("customFrom")
   const customTo = watch("customTo")
-  const fullAddressFrom = watch("fullAddressFrom")
-  const fullAddressTo = watch("fullAddressTo")
   const returnFrom = watch("returnFrom")
   const returnTo = watch("returnTo")
   const customReturnFrom = watch("customReturnFrom")
@@ -404,16 +405,16 @@ export default function BookingContent() {
   const coachCapacity = watch("coachCapacity")
   const sprinterCapacity = watch("sprinterCapacity")
   const formData = watch()
+  const hours = watch("hours")
 
   const serviceTypes = [
     { id: "corporate", label: t("nav.services.corporate") },
     { id: "sightseeing", label: t("nav.services.sightseeing") },
     { id: "touring", label: t("nav.services.touring") },
     { id: "stand-by", label: t("service.standby") },
-    ...(selectedVehicle === "coach" || selectedVehicle === "sprinter" 
-      ? [{ id: "groups-events", label: t("services.groupsevents") }] 
-      : []
-    )
+    ...(selectedVehicle === "coach" || selectedVehicle === "sprinter"
+      ? [{ id: "groups-events", label: t("services.groupsevents") }]
+      : []),
   ]
 
   const touringPlans = [
@@ -426,162 +427,115 @@ export default function BookingContent() {
   const calculatePrice = () => {
     if (rideType !== "one_way" && rideType !== "round_trip") return null
     if (!selectedVehicle || (selectedVehicle !== "e-class" && selectedVehicle !== "s-class" && selectedVehicle !== "v-class")) return null
-    
-    // Check for "other" in any location field - if yes, no pricing
+
     if (from === "other" || to === "other") return null
     if (rideType === "round_trip" && !sameReturnLocation && (returnFrom === "other" || returnTo === "other")) return null
-    
+
     const pickupLoc = from
     const dropLoc = to
-    
     if (!pickupLoc || !dropLoc) return null
-    
-    // Calculate outbound journey price
+
     const outboundRouteKey = `${pickupLoc}-${dropLoc}` as RouteKey
     const reverseRouteKey = `${dropLoc}-${pickupLoc}` as RouteKey
     let outboundPricing = routePricing[outboundRouteKey]
-
-    if (!outboundPricing) {
-      outboundPricing = routePricing[reverseRouteKey]
-    }
-
+    if (!outboundPricing) outboundPricing = routePricing[reverseRouteKey]
     if (!outboundPricing) return null
-    
+
     let price = 0
     if (selectedVehicle === "e-class") price = outboundPricing.eClass
     if (selectedVehicle === "v-class") price = outboundPricing.vClass
     if (selectedVehicle === "s-class") price = outboundPricing.sClass
-    
-    // For round trip
+
     if (rideType === "round_trip") {
       if (sameReturnLocation) {
-        // Same locations: just double the price
         price = price * 2
       } else {
-        // Different locations: calculate return journey separately
         if (!returnFrom || !returnTo) return null
-        
         const returnRouteKey = `${returnFrom}-${returnTo}` as RouteKey
         const reverseReturnRouteKey = `${returnTo}-${returnFrom}` as RouteKey
         let returnPricing = routePricing[returnRouteKey]
-
-        if (!returnPricing) {
-          returnPricing = routePricing[reverseReturnRouteKey]
-        }
-
+        if (!returnPricing) returnPricing = routePricing[reverseReturnRouteKey]
         if (!returnPricing) return null
-        
+
         let returnPrice = 0
         if (selectedVehicle === "e-class") returnPrice = returnPricing.eClass
         if (selectedVehicle === "v-class") returnPrice = returnPricing.vClass
         if (selectedVehicle === "s-class") returnPrice = returnPricing.sClass
-        
         price = price + returnPrice
       }
     }
-    
     return price
   }
 
   const calculateHourlyPrice = () => {
     if (rideType !== "hourly") return null
-    if (!selectedVehicle || (selectedVehicle !== "e-class" && selectedVehicle !== "s-class" && selectedVehicle !== "v-class")) return null
-    if (!serviceType) return null
-    if (!formData.hours || formData.hours < 3) return null
-    
-    // Only calculate for services that require hours
-    if (serviceType !== "corporate" && serviceType !== "stand-by" && serviceType !== "groups-events") return null
-    
-    const hourlyRate = hourlyPricing[selectedVehicle]
-    if (!hourlyRate) return null
-    
-    return hourlyRate * formData.hours
+    if (!["e-class", "s-class", "v-class"].includes(selectedVehicle)) return null
+    if (!serviceType || !["corporate", "stand-by", "groups-events"].includes(serviceType)) return null
+    if (!hours || hours < 3) return null   // ← formData.hours → hours
+    const rate = hourlyPricing[selectedVehicle]
+    if (!rate) return null
+    return rate * hours
   }
+
+
 
   const estimatedPrice = rideType === "hourly" ? calculateHourlyPrice() : calculatePrice()
 
   const steps = [
     { number: 1, title: t("booking.step2.title") },
     { number: 2, title: t("booking.step1.title") },
-    { 
-      number: 3, 
-      title: estimatedPrice !== null 
+    {
+      number: 3,
+      title: estimatedPrice !== null
         ? (language === "nl" ? "Boek Nu" : "Book Now")
-        : t("booking.step3.title")
+        : t("booking.step3.title"),
     },
     { number: 4, title: t("booking.success.title") },
-]
+  ]
 
   const handleNext = async () => {
     let isValid = false
     if (step === 1) {
       const fieldsToValidate: (keyof FormData)[] = ["vehicle"]
-      if (selectedVehicle === "coach") {
-        fieldsToValidate.push("coachCapacity")
-      }
-      if (selectedVehicle === "sprinter") {
-        fieldsToValidate.push("sprinterCapacity")
-      }
+      if (selectedVehicle === "coach") fieldsToValidate.push("coachCapacity")
+      if (selectedVehicle === "sprinter") fieldsToValidate.push("sprinterCapacity")
       isValid = await trigger(fieldsToValidate)
     }
     if (step === 2) {
-      // Custom validation for baggage and passengers
-      const selectedVehicleData = vehicles.find(v => v.id === selectedVehicle)
+      const selectedVehicleData = vehicles.find((v) => v.id === selectedVehicle)
       const maxLuggage = selectedVehicleData?.luggage || 20
       const maxPassengers = selectedVehicleData?.passengers || 89
       const currentBaggage = watch("baggage")
       const currentPassengers = watch("passengers")
-      
-      // Clear previous errors
+
       clearErrors(["baggage", "passengers"])
-      
       let customValidationFailed = false
-      
-      // Validate baggage
+
       if (currentBaggage > maxLuggage) {
         form.setError("baggage", {
           type: "manual",
-          message: language === "nl" 
+          message: language === "nl"
             ? `Maximum ${maxLuggage} bagage toegestaan voor dit voertuig`
-            : `Maximum ${maxLuggage} luggage allowed for this vehicle`
+            : `Maximum ${maxLuggage} luggage allowed for this vehicle`,
         })
         customValidationFailed = true
       }
-      
-      // Validate passengers
       if (currentPassengers > maxPassengers) {
         form.setError("passengers", {
           type: "manual",
           message: language === "nl"
             ? `Maximum ${maxPassengers} passagiers toegestaan voor dit voertuig`
-            : `Maximum ${maxPassengers} passengers allowed for this vehicle`
+            : `Maximum ${maxPassengers} passengers allowed for this vehicle`,
         })
         customValidationFailed = true
       }
-      
-      // If custom validations failed, don't proceed
-      if (customValidationFailed) {
-        return
-      }
-      
-      // Standard validation
-      const fieldsToValidate: (keyof FormData)[] = [
-        "rideType",
-        "date",
-        "time",
-        "from",
-        "baggage",
-        "passengers",
-        "handLuggage",
-      ]
+      if (customValidationFailed) return
+
+      const fieldsToValidate: (keyof FormData)[] = ["rideType", "date", "time", "from", "baggage", "passengers", "handLuggage"]
       if (rideType === "one_way" || rideType === "round_trip") fieldsToValidate.push("to")
       if (rideType === "round_trip") {
-        fieldsToValidate.push("returnDate")
-        fieldsToValidate.push("returnTime")
-        if (!sameReturnLocation) {
-          fieldsToValidate.push("returnFrom")
-          fieldsToValidate.push("returnTo")
-        }
+        fieldsToValidate.push("returnDate", "returnTime")
+        if (!sameReturnLocation) fieldsToValidate.push("returnFrom", "returnTo")
       }
       if (rideType === "hourly") {
         fieldsToValidate.push("serviceType")
@@ -590,70 +544,49 @@ export default function BookingContent() {
         }
         if (serviceType === "touring") {
           fieldsToValidate.push("touringPlan")
-          if (touringPlan === "other") {
-            fieldsToValidate.push("customTourDetails")
-          }
+          if (touringPlan === "other") fieldsToValidate.push("customTourDetails")
         }
       }
-      
       isValid = await trigger(fieldsToValidate)
     }
     if (step === 3) isValid = await trigger(["firstName", "lastName", "phone", "email"])
-
     if (isValid) setStep((s) => s + 1)
   }
 
   const handleBack = () => setStep((s) => s - 1)
 
+  const buildCleanData = (data: FormData) => ({
+    ...data,
+    from: data.from === "other" ? data.customFrom : data.from,
+    to: data.to === "other" ? data.customTo : data.to,
+    returnFrom: data.returnFrom === "other" ? data.customReturnFrom : data.returnFrom,
+    returnTo: data.returnTo === "other" ? data.customReturnTo : data.returnTo,
+    fullAddressFrom: data.fullAddressFrom || "",
+    fullAddressTo: data.fullAddressTo || "",
+    fullAddressReturnFrom: data.fullAddressReturnFrom || "",
+    fullAddressReturnTo: data.fullAddressReturnTo || "",
+    coachCapacity: data.coachCapacity || "",
+    sprinterCapacity: data.sprinterCapacity || "",
+    sprinterTrailer: data.sprinterTrailer || false,
+    serviceType: data.serviceType || "",
+    hours: data.hours || 0,
+    sightseeingLoc: data.sightseeingLoc || "",
+    otherLoc: data.otherLoc || "",
+    touringPlan: data.touringPlan || "",
+    customTourDetails: data.customTourDetails || "",
+  })
+
+  // ── Request Quote → Email only ──
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true)
     try {
       const veh = vehicles.find((v) => v.id === data.vehicle) || vehicles[0]
-      const lang = language
-
-      // Prepare clean data object with ALL values
-      const cleanData = {
-        ...data,
-        // Make sure "other" locations are properly handled
-        from: data.from === "other" ? data.customFrom : data.from,
-        to: data.to === "other" ? data.customTo : data.to,
-        returnFrom: data.returnFrom === "other" ? data.customReturnFrom : data.returnFrom,
-        returnTo: data.returnTo === "other" ? data.customReturnTo : data.returnTo,
-        // Include all address fields
-        fullAddressFrom: data.fullAddressFrom || "",
-        fullAddressTo: data.fullAddressTo || "",
-        fullAddressReturnFrom: data.fullAddressReturnFrom || "",
-        fullAddressReturnTo: data.fullAddressReturnTo || "",
-        // Include vehicle specific options
-        coachCapacity: data.coachCapacity || "",
-        sprinterCapacity: data.sprinterCapacity || "",
-        sprinterTrailer: data.sprinterTrailer || false,
-        // Include luggage types
-        handLuggage: data.handLuggage,
-        checkedLuggage: data.checkedLuggage,
-        // Include service type specific fields
-        serviceType: data.serviceType || "",
-        hours: data.hours || 0,
-        sightseeingLoc: data.sightseeingLoc || "",
-        otherLoc: data.otherLoc || "",
-        touringPlan: data.touringPlan || "",
-        customTourDetails: data.customTourDetails || "",
-      }
-
       const response = await fetch("/api/boeken-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          data: cleanData,
-          vehicle: veh,
-          lang,
-        }),
+        body: JSON.stringify({ data: buildCleanData(data), vehicle: veh, lang: language }),
       })
-
-      if (!response.ok) {
-        throw new Error("Failed to send emails")
-      }
-
+      if (!response.ok) throw new Error("Failed to send emails")
       setIsSubmitted(true)
     } catch (error) {
       console.error("Error submitting booking:", error)
@@ -667,6 +600,36 @@ export default function BookingContent() {
     }
   }
 
+  // ── Pay Now → Stripe Checkout ──
+  const handlePayNow = async (data: FormData) => {
+    setIsRedirectingToStripe(true)
+    try {
+      const veh = vehicles.find((v) => v.id === data.vehicle) || vehicles[0]
+      const response = await fetch("/api/create-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          data: buildCleanData(data),
+          vehicle: veh,
+          lang: language,
+          estimatedPrice,
+          priceType: rideType === "hourly" ? "hourly" : "fixed",
+        }),
+      })
+      if (!response.ok) throw new Error("Failed to create checkout session")
+      const { url } = await response.json()
+      if (url) window.location.href = url
+    } catch (error) {
+      console.error("Stripe error:", error)
+      alert(
+        language === "nl"
+          ? "Er is een fout opgetreden bij het verwerken van de betaling. Probeer het opnieuw."
+          : "An error occurred while processing payment. Please try again.",
+      )
+    } finally {
+      setIsRedirectingToStripe(false)
+    }
+  }
 
   if (isSubmitted) {
     return (
@@ -692,14 +655,6 @@ export default function BookingContent() {
     )
   }
 
-  // Helper function to get display value for locations
-  const getLocationDisplay = (location: string, customLocation?: string) => {
-    if (location === "other" && customLocation) {
-      return customLocation
-    }
-    return location
-  }
-
   return (
     <div className="min-h-screen bg-gray-950 py-12 md:py-20">
       <h1 className="sr-only">Luxe Vervoer Amsterdam Boeken | Vraag Direct Offerte Aan</h1>
@@ -709,6 +664,20 @@ export default function BookingContent() {
           <h2 className="text-5xl md:text-6xl font-bold text-white mb-6">{t("booking.title")}</h2>
           <p className="text-xl text-gray-400 max-w-4xl mx-auto leading-relaxed">{t("booking.subtitle")}</p>
         </div>
+
+        {/* ── Payment Cancelled Notification ── */}
+        {showCancelledNotification && (
+          <div className="max-w-4xl mx-auto mb-8">
+            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 flex items-center gap-3">
+              <span className="text-yellow-400 text-xl">⚠️</span>
+              <span className="text-yellow-400 font-medium">
+                {language === "nl"
+                  ? "Betaling geannuleerd. U kunt het opnieuw proberen of een offerte aanvragen."
+                  : "Payment cancelled. You can try again or request a quote."}
+              </span>
+            </div>
+          </div>
+        )}
 
         {showVehicleNotification && preSelectedVehicle && (
           <div className="max-w-4xl mx-auto mb-8">
@@ -724,6 +693,7 @@ export default function BookingContent() {
           </div>
         )}
 
+        {/* Step Indicators */}
         <div className="max-w-5xl mx-auto mb-16">
           <div className="flex items-center justify-between relative">
             <div className="absolute top-6 left-6 right-6 h-0.5 bg-gray-700"></div>
@@ -761,7 +731,10 @@ export default function BookingContent() {
         <div className="max-w-4xl mx-auto">
           <div className="bg-gray-900 rounded-2xl border border-gray-800 shadow-2xl overflow-hidden">
             <form onSubmit={handleSubmit(onSubmit)}>
-               {/* Step 1: Choose Vehicle */}
+
+              {/* ══════════════════════════════════════
+                  STEP 1: Choose Vehicle
+              ══════════════════════════════════════ */}
               <div className={cn("transition-all duration-500", step !== 1 && "hidden")}>
                 <div className="p-8 md:p-12">
                   <h2 className="text-3xl font-bold mb-8 text-white">{t("booking.step2.title")}</h2>
@@ -782,7 +755,6 @@ export default function BookingContent() {
                       <RadioGroup
                         onValueChange={(value) => {
                           field.onChange(value)
-                          // Reset vehicle-specific options when changing vehicle
                           setValue("coachCapacity", "")
                           setValue("sprinterCapacity", "")
                           setValue("sprinterTrailer", false)
@@ -826,7 +798,7 @@ export default function BookingContent() {
                   />
                   {errors.vehicle && <p className="text-red-400 text-sm mt-6 text-center">{errors.vehicle.message}</p>}
 
-                  {/* Coach Capacity Selection */}
+                  {/* Coach Capacity */}
                   {selectedVehicle === "coach" && (
                     <div className="mt-8 space-y-4">
                       <Label className="text-white font-medium text-lg">
@@ -866,7 +838,7 @@ export default function BookingContent() {
                     </div>
                   )}
 
-                  {/* Sprinter Capacity Selection */}
+                  {/* Sprinter Capacity */}
                   {selectedVehicle === "sprinter" && (
                     <div className="mt-8 space-y-4">
                       <Label className="text-white font-medium text-lg">
@@ -903,8 +875,6 @@ export default function BookingContent() {
                         )}
                       />
                       {errors.sprinterCapacity && <p className="text-red-400 text-sm">{errors.sprinterCapacity.message}</p>}
-
-                      {/* Trailer Option */}
                       <div className="mt-4">
                         <Label className="text-white font-medium text-lg mb-4 block">
                           {language === "nl" ? "Extra opties" : "Additional Options"}
@@ -932,12 +902,15 @@ export default function BookingContent() {
                 </div>
               </div>
 
-              {/* Step 2: Ride Details */}
+              {/* ══════════════════════════════════════
+                  STEP 2: Ride Details
+              ══════════════════════════════════════ */}
               <div className={cn("transition-all duration-500", step !== 2 && "hidden")}>
                 <div className="p-8 md:p-12">
                   <h3 className="text-3xl font-bold mb-8 text-white">{t("booking.step1.title")}</h3>
-
                   <div className="space-y-8">
+
+                    {/* Ride Type */}
                     <Controller
                       name="rideType"
                       control={control}
@@ -960,21 +933,8 @@ export default function BookingContent() {
                               setValue("returnTo", "")
                               setValue("sameReturnLocation", false)
                             }
-                            if (value === "hourly") {
-                              setValue("to", "")
-                            }
-                            clearErrors([
-                              "to",
-                              "returnDate",
-                              "returnTime",
-                              "returnFrom",
-                              "returnTo", 
-                              "serviceType",
-                              "hours",
-                              "sightseeingLoc",
-                              "touringPlan",
-                              "customTourDetails",
-                            ])
+                            if (value === "hourly") setValue("to", "")
+                            clearErrors(["to", "returnDate", "returnTime", "returnFrom", "returnTo", "serviceType", "hours", "sightseeingLoc", "touringPlan", "customTourDetails"])
                           }}
                           value={field.value}
                           className="grid grid-cols-3 gap-6"
@@ -1034,34 +994,29 @@ export default function BookingContent() {
                       )}
                     />
 
-                    {/* HOURLY PRICE - DATE SE PEHLE */}
-                    {rideType === "hourly" && 
-                    (selectedVehicle === "e-class" || selectedVehicle === "s-class" || selectedVehicle === "v-class") && (
-                      <div className="bg-gradient-to-r from-green-500/10 to-teal-500/10 border border-green-500/30 rounded-xl p-6">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h4 className="text-lg font-semibold text-white mb-1">
-                              {language === "nl" ? "Uurprijs" : "Hourly Rate"}
-                            </h4>
-                            <p className="text-gray-400 text-sm">
-                              {language === "nl" ? "Per uur" : "Per hour"}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-3xl font-bold text-green-400">€ {hourlyPricing[selectedVehicle]}</p>
-                            <p className="text-xs text-gray-400 mt-1">
-                              {language === "nl" ? "per uur" : "per hour"}
-                            </p>
+                    {/* Hourly rate display */}
+                    {rideType === "hourly" &&
+                      (selectedVehicle === "e-class" || selectedVehicle === "s-class" || selectedVehicle === "v-class") && (
+                        <div className="bg-gradient-to-r from-green-500/10 to-teal-500/10 border border-green-500/30 rounded-xl p-6">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="text-lg font-semibold text-white mb-1">
+                                {language === "nl" ? "Uurprijs" : "Hourly Rate"}
+                              </h4>
+                              <p className="text-gray-400 text-sm">{language === "nl" ? "Per uur" : "Per hour"}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-3xl font-bold text-green-400">€ {hourlyPricing[selectedVehicle]}</p>
+                              <p className="text-xs text-gray-400 mt-1">{language === "nl" ? "per uur" : "per hour"}</p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
+                    {/* Date & Time */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <Label htmlFor="date" className="text-white font-medium">
-                          {t("booking.form.date")}
-                        </Label>
+                        <Label htmlFor="date" className="text-white font-medium">{t("booking.form.date")}</Label>
                         <Controller
                           name="date"
                           control={control}
@@ -1078,9 +1033,7 @@ export default function BookingContent() {
                         {errors.date && <p className="text-red-400 text-sm">{errors.date.message}</p>}
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="time" className="text-white font-medium">
-                          {t("booking.form.time")}
-                        </Label>
+                        <Label htmlFor="time" className="text-white font-medium">{t("booking.form.time")}</Label>
                         <Controller
                           name="time"
                           control={control}
@@ -1089,20 +1042,9 @@ export default function BookingContent() {
                               <SelectTrigger className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500">
                                 <SelectValue placeholder={language === "nl" ? "Selecteer tijd" : "Select time"} />
                               </SelectTrigger>
-                              <SelectContent
-                                className="bg-gray-800 border-gray-700 max-h-60"
-                                position="popper"
-                                side="bottom"
-                                align="start"
-                              >
+                              <SelectContent className="bg-gray-800 border-gray-700 max-h-60" position="popper" side="bottom" align="start">
                                 {timeSlots.map((time) => (
-                                  <SelectItem
-                                    key={time}
-                                    value={time}
-                                    className="text-white hover:bg-gray-700 focus:bg-gray-700"
-                                  >
-                                    {time}
-                                  </SelectItem>
+                                  <SelectItem key={time} value={time} className="text-white hover:bg-gray-700 focus:bg-gray-700">{time}</SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
@@ -1112,442 +1054,372 @@ export default function BookingContent() {
                       </div>
                     </div>
 
+                    {/* From */}
+                    <div className="space-y-2">
+                      <Label htmlFor="from" className="text-white font-medium">{t("booking.form.from")}</Label>
+                      <Controller
+                        name="from"
+                        control={control}
+                        render={({ field }) => (
+                          <Select
+                            onValueChange={(value) => {
+                              field.onChange(value)
+                              if (value !== "other") setValue("customFrom", "")
+                              clearErrors("from")
+                            }}
+                            value={field.value}
+                          >
+                            <SelectTrigger className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500">
+                              <SelectValue placeholder={language === "nl" ? "Selecteer ophaallocatie" : "Select pick-up location"} />
+                            </SelectTrigger>
+                            <SelectContent className="bg-gray-800 border-gray-700 max-h-60" position="popper" side="bottom" align="start">
+                              {locationOptions.map((location) => (
+                                <SelectItem key={location} value={location} className="text-white hover:bg-gray-700 focus:bg-gray-700">{location}</SelectItem>
+                              ))}
+                              <SelectItem value="other" className="text-white hover:bg-gray-700 focus:bg-gray-700">
+                                {language === "nl" ? "Andere locatie" : "Other location"}
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        )}
+                      />
+                      {errors.from && <p className="text-red-400 text-sm">{errors.from.message}</p>}
+                    </div>
+
+                    {from === "other" && (
                       <div className="space-y-2">
-                        <Label htmlFor="from" className="text-white font-medium">
-                          {t("booking.form.from")}
+                        <Label htmlFor="customFrom" className="text-white font-medium">
+                          {language === "nl" ? "Aangepaste ophaallocatie" : "Custom pick-up location"}
                         </Label>
                         <Controller
-                          name="from"
+                          name="customFrom"
                           control={control}
                           render={({ field }) => (
-                            <Select 
-                              onValueChange={(value) => {
-                                field.onChange(value)
-                                if (value !== "other") {
-                                  setValue("customFrom", "")
-                                }
-                                clearErrors("from")
-                              }} 
-                              value={field.value}
-                            >
-                              <SelectTrigger className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500">
-                                <SelectValue placeholder={language === "nl" ? "Selecteer ophaallocatie" : "Select pick-up location"} />
-                              </SelectTrigger>
-                              <SelectContent
-                                className="bg-gray-800 border-gray-700 max-h-60"
-                                position="popper"
-                                side="bottom"
-                                align="start"
-                              >
-                                {locationOptions.map((location) => (
-                                  <SelectItem
-                                    key={location}
-                                    value={location}
-                                    className="text-white hover:bg-gray-700 focus:bg-gray-700"
-                                  >
-                                    {location}
-                                  </SelectItem>
-                                ))}
-                                <SelectItem value="other" className="text-white hover:bg-gray-700 focus:bg-gray-700">
-                                  {language === "nl" ? "Andere locatie" : "Other location"}
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <Input
+                              id="customFrom"
+                              placeholder={language === "nl" ? "Voer ophaallocatie in" : "Enter pick-up location"}
+                              className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20"
+                              {...field}
+                            />
                           )}
                         />
-                        {errors.from && <p className="text-red-400 text-sm">{errors.from.message}</p>}
                       </div>
+                    )}
 
-                      {from === "other" && (
+                    {from && (
+                      <div className="space-y-2">
+                        <Label htmlFor="fullAddressFrom" className="text-white font-medium">
+                          {language === "nl" ? "Volledige ophaallocatie" : "Full Pickup Location"}
+                        </Label>
+                        <Controller
+                          name="fullAddressFrom"
+                          control={control}
+                          render={({ field }) => (
+                            <Input
+                              id="fullAddressFrom"
+                              placeholder={language === "nl" ? "Bijv. Straatnaam 123, 1012 AB Amsterdam" : "E.g. Street Name 123, 1012 AB Amsterdam"}
+                              className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20"
+                              {...field}
+                            />
+                          )}
+                        />
+                        <p className="text-xs text-gray-400">
+                          {language === "nl" ? "Voor nauwkeurige ophaallocatie" : "For precise pickup location"}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* To */}
+                    {(rideType === "one_way" || rideType === "round_trip") && (
+                      <>
                         <div className="space-y-2">
-                          <Label htmlFor="customFrom" className="text-white font-medium">
-                            {language === "nl" ? "Aangepaste ophaallocatie" : "Custom pick-up location"}
-                          </Label>
+                          <Label htmlFor="to" className="text-white font-medium">{t("booking.form.to")}</Label>
                           <Controller
-                            name="customFrom"
+                            name="to"
                             control={control}
                             render={({ field }) => (
-                              <Input
-                                id="customFrom"
-                                placeholder={language === "nl" ? "Voer ophaallocatie in" : "Enter pick-up location"}
-                                className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20"
-                                {...field}
-                              />
+                              <Select
+                                onValueChange={(value) => {
+                                  field.onChange(value)
+                                  if (value !== "other") setValue("customTo", "")
+                                  clearErrors("to")
+                                }}
+                                value={field.value}
+                              >
+                                <SelectTrigger className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500">
+                                  <SelectValue placeholder={language === "nl" ? "Selecteer bestemmingslocatie" : "Select drop-off location"} />
+                                </SelectTrigger>
+                                <SelectContent className="bg-gray-800 border-gray-700 max-h-60" position="popper" side="bottom" align="start">
+                                  {locationOptions.map((location) => (
+                                    <SelectItem key={location} value={location} className="text-white hover:bg-gray-700 focus:bg-gray-700">{location}</SelectItem>
+                                  ))}
+                                  <SelectItem value="other" className="text-white hover:bg-gray-700 focus:bg-gray-700">
+                                    {language === "nl" ? "Andere locatie" : "Other location"}
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
                             )}
                           />
+                          {errors.to && <p className="text-red-400 text-sm">{errors.to.message}</p>}
                         </div>
-                      )}
-                      {/* Full Address for From Location - ALWAYS SHOW */}
-                      {from && (
-                        <div className="space-y-2">
-                          <Label htmlFor="fullAddressFrom" className="text-white font-medium">
-                            {language === "nl" ? "Volledige ophaallocatie" : "Full Pickup Location"}
-                          </Label>
-                          <Controller
-                            name="fullAddressFrom"
-                            control={control}
-                            render={({ field }) => (
-                              <Input
-                                id="fullAddressFrom"
-                                placeholder={language === "nl" ? "Bijv. Straatnaam 123, 1012 AB Amsterdam" : "E.g. Street Name 123, 1012 AB Amsterdam"}
-                                className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20"
-                                {...field}
-                              />
-                            )}
-                          />
-                          <p className="text-xs text-gray-400">
-                            {language === "nl" ? "Voor nauwkeurige ophaallocatie" : "For precise pickup location"}
-                          </p>
-                        </div>
-                      )}
 
-                      {(rideType === "one_way" || rideType === "round_trip") && (
-                        <>
+                        {to === "other" && (
                           <div className="space-y-2">
-                            <Label htmlFor="to" className="text-white font-medium">
-                              {t("booking.form.to")}
+                            <Label htmlFor="customTo" className="text-white font-medium">
+                              {language === "nl" ? "Aangepaste bestemmingslocatie" : "Custom drop-off location"}
                             </Label>
                             <Controller
-                              name="to"
+                              name="customTo"
                               control={control}
                               render={({ field }) => (
-                                <Select 
-                                  onValueChange={(value) => {
-                                    field.onChange(value)
-                                    if (value !== "other") {
-                                      setValue("customTo", "")
-                                    }
-                                    clearErrors("to")
-                                  }} 
-                                  value={field.value}
-                                >
+                                <Input
+                                  id="customTo"
+                                  placeholder={language === "nl" ? "Voer bestemmingslocatie in" : "Enter drop-off location"}
+                                  className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20"
+                                  {...field}
+                                />
+                              )}
+                            />
+                          </div>
+                        )}
+
+                        {to && (
+                          <div className="space-y-2">
+                            <Label htmlFor="fullAddressTo" className="text-white font-medium">
+                              {language === "nl" ? "Volledige afleverlocatie" : "Full Drop-off Location"}
+                            </Label>
+                            <Controller
+                              name="fullAddressTo"
+                              control={control}
+                              render={({ field }) => (
+                                <Input
+                                  id="fullAddressTo"
+                                  placeholder={language === "nl" ? "Bijv. Straatnaam 123, 1012 AB Amsterdam" : "E.g. Street Name 123, 1012 AB Amsterdam"}
+                                  className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20"
+                                  {...field}
+                                />
+                              )}
+                            />
+                            <p className="text-xs text-gray-400">
+                              {language === "nl" ? "Voor nauwkeurige afleverlocatie" : "For precise drop-off location"}
+                            </p>
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    {/* Round Trip Return */}
+                    {rideType === "round_trip" && (
+                      <>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label htmlFor="returnDate" className="text-white font-medium">{t("booking.form.return_date")}</Label>
+                            <Controller
+                              name="returnDate"
+                              control={control}
+                              render={({ field }) => (
+                                <Input
+                                  id="returnDate"
+                                  type="date"
+                                  min={minDate}
+                                  className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20"
+                                  {...field}
+                                />
+                              )}
+                            />
+                            {errors.returnDate && <p className="text-red-400 text-sm">{errors.returnDate.message}</p>}
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="returnTime" className="text-white font-medium">{t("booking.form.return_time")}</Label>
+                            <Controller
+                              name="returnTime"
+                              control={control}
+                              render={({ field }) => (
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
                                   <SelectTrigger className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500">
-                                    <SelectValue placeholder={language === "nl" ? "Selecteer bestemmingslocatie" : "Select drop-off location"} />
+                                    <SelectValue placeholder={language === "nl" ? "Selecteer retour tijd" : "Select return time"} />
                                   </SelectTrigger>
-                                  <SelectContent
-                                    className="bg-gray-800 border-gray-700 max-h-60"
-                                    position="popper"
-                                    side="bottom"
-                                    align="start"
-                                  >
-                                    {locationOptions.map((location) => (
-                                      <SelectItem
-                                        key={location}
-                                        value={location}
-                                        className="text-white hover:bg-gray-700 focus:bg-gray-700"
-                                      >
-                                        {location}
-                                      </SelectItem>
+                                  <SelectContent className="bg-gray-800 border-gray-700 max-h-60" position="popper" side="bottom" align="start">
+                                    {timeSlots.map((time) => (
+                                      <SelectItem key={time} value={time} className="text-white hover:bg-gray-700 focus:bg-gray-700">{time}</SelectItem>
                                     ))}
-                                    <SelectItem value="other" className="text-white hover:bg-gray-700 focus:bg-gray-700">
-                                      {language === "nl" ? "Andere locatie" : "Other location"}
-                                    </SelectItem>
                                   </SelectContent>
                                 </Select>
                               )}
                             />
-                            {errors.to && <p className="text-red-400 text-sm">{errors.to.message}</p>}
+                            {errors.returnTime && <p className="text-red-400 text-sm">{errors.returnTime.message}</p>}
                           </div>
+                        </div>
 
-                          {to === "other" && (
-                            <div className="space-y-2">
-                              <Label htmlFor="customTo" className="text-white font-medium">
-                                {language === "nl" ? "Aangepaste bestemmingslocatie" : "Custom drop-off location"}
-                              </Label>
-                              <Controller
-                                name="customTo"
-                                control={control}
-                                render={({ field }) => (
-                                  <Input
-                                    id="customTo"
-                                    placeholder={language === "nl" ? "Voer bestemmingslocatie in" : "Enter drop-off location"}
-                                    className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20"
-                                    {...field}
-                                  />
-                                )}
-                              />
-                            </div>
-                          )}
-                          {/* Full Address for To Location - SHOW ONLY WHEN LOCATION SELECTED */}
-                          {(rideType === "one_way" || rideType === "round_trip") && to && (
-                            <div className="space-y-2">
-                              <Label htmlFor="fullAddressTo" className="text-white font-medium">
-                                {language === "nl" ? "Volledige afleverlocatie" : "Full Drop-off Location"}
-                              </Label>
-                              <Controller
-                                name="fullAddressTo"
-                                control={control}
-                                render={({ field }) => (
-                                  <Input
-                                    id="fullAddressTo"
-                                    placeholder={language === "nl" ? "Bijv. Straatnaam 123, 1012 AB Amsterdam" : "E.g. Street Name 123, 1012 AB Amsterdam"}
-                                    className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20"
-                                    {...field}
-                                  />
-                                )}
-                              />
-                              <p className="text-xs text-gray-400">
-                                {language === "nl" ? "Voor nauwkeurige afleverlocatie" : "For precise drop-off location"}
-                              </p>
-                            </div>
-                          )}
-                          
-                        </>
-                      )}
+                        <div className="space-y-4">
+                          <Controller
+                            name="sameReturnLocation"
+                            control={control}
+                            render={({ field }) => (
+                              <div className="flex items-center space-x-3 p-4 bg-gray-800 rounded-lg border border-gray-700">
+                                <Checkbox
+                                  id="sameReturnLocation"
+                                  checked={field.value}
+                                  onCheckedChange={(checked) => {
+                                    field.onChange(checked)
+                                    if (checked) {
+                                      setValue("returnFrom", to)
+                                      setValue("returnTo", from)
+                                      clearErrors(["returnFrom", "returnTo"])
+                                    } else {
+                                      setValue("returnFrom", "")
+                                      setValue("returnTo", "")
+                                    }
+                                  }}
+                                  className="border-gray-600 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+                                />
+                                <Label htmlFor="sameReturnLocation" className="text-white cursor-pointer">
+                                  {language === "nl" ? "Zelfde locatie voor retour" : "Same location for return"}
+                                </Label>
+                              </div>
+                            )}
+                          />
 
-                      {rideType === "round_trip" && (
-                        <>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                              <Label htmlFor="returnDate" className="text-white font-medium">
-                                {t("booking.form.return_date")}
-                              </Label>
-                              <Controller
-                                name="returnDate"
-                                control={control}
-                                render={({ field }) => (
-                                  <Input
-                                    id="returnDate"
-                                    type="date"
-                                    min={minDate}
-                                    className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20"
-                                    {...field}
-                                  />
-                                )}
-                              />
-                              {errors.returnDate && <p className="text-red-400 text-sm">{errors.returnDate.message}</p>}
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="returnTime" className="text-white font-medium">
-                                {t("booking.form.return_time")}
-                              </Label>
-                              <Controller
-                                name="returnTime"
-                                control={control}
-                                render={({ field }) => (
-                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <SelectTrigger className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500">
-                                      <SelectValue
-                                        placeholder={language === "nl" ? "Selecteer retour tijd" : "Select return time"}
-                                      />
-                                    </SelectTrigger>
-                                    <SelectContent
-                                      className="bg-gray-800 border-gray-700 max-h-60"
-                                      position="popper"
-                                      side="bottom"
-                                      align="start"
+                          {!sameReturnLocation && (
+                            <>
+                              {/* Return From */}
+                              <div className="space-y-2">
+                                <Label className="text-white font-medium">
+                                  {language === "nl" ? "Retour ophaallocatie" : "Return pick-up location"}
+                                </Label>
+                                <Controller
+                                  name="returnFrom"
+                                  control={control}
+                                  render={({ field }) => (
+                                    <Select
+                                      onValueChange={(value) => {
+                                        field.onChange(value)
+                                        clearErrors("returnFrom")
+                                      }}
+                                      value={field.value}
                                     >
-                                      {timeSlots.map((time) => (
-                                        <SelectItem
-                                          key={time}
-                                          value={time}
-                                          className="text-white hover:bg-gray-700 focus:bg-gray-700"
-                                        >
-                                          {time}
+                                      <SelectTrigger className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500">
+                                        <SelectValue placeholder={language === "nl" ? "Selecteer retour ophaallocatie" : "Select return pick-up location"} />
+                                      </SelectTrigger>
+                                      <SelectContent className="bg-gray-800 border-gray-700 max-h-60" position="popper" side="bottom" align="start">
+                                        {locationOptions.map((location) => (
+                                          <SelectItem key={location} value={location} className="text-white hover:bg-gray-700 focus:bg-gray-700">{location}</SelectItem>
+                                        ))}
+                                        <SelectItem value="other" className="text-white hover:bg-gray-700 focus:bg-gray-700">
+                                          {language === "nl" ? "Andere locatie" : "Other location"}
                                         </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                )}
-                              />
-                              {errors.returnTime && <p className="text-red-400 text-sm">{errors.returnTime.message}</p>}
-                            </div>
-                          </div>
-                          <div className="space-y-4">
-                            <Controller
-                              name="sameReturnLocation"
-                              control={control}
-                              render={({ field }) => (
-                                <div className="flex items-center space-x-3 p-4 bg-gray-800 rounded-lg border border-gray-700">
-                                  <Checkbox
-                                    id="sameReturnLocation"
-                                    checked={field.value}
-                                    onCheckedChange={(checked) => {
-                                      field.onChange(checked)
-                                      if (checked) {
-                                        setValue("returnFrom", to)
-                                        setValue("returnTo", from)
-                                        clearErrors(["returnFrom", "returnTo"])
-                                      } else {
-                                        setValue("returnFrom", "")
-                                        setValue("returnTo", "")
-                                      }
-                                    }}
-                                    className="border-gray-600 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
-                                  />
-                                  <Label htmlFor="sameReturnLocation" className="text-white cursor-pointer">
-                                    {language === "nl" ? "Zelfde locatie voor retour" : "Same location for return"}
+                                      </SelectContent>
+                                    </Select>
+                                  )}
+                                />
+                                {errors.returnFrom && <p className="text-red-400 text-sm">{errors.returnFrom.message}</p>}
+                              </div>
+
+                              {returnFrom === "other" && (
+                                <div className="space-y-2">
+                                  <Label className="text-white font-medium">
+                                    {language === "nl" ? "Aangepaste retour ophaallocatie" : "Custom return pick-up location"}
                                   </Label>
+                                  <Input
+                                    placeholder={language === "nl" ? "Voer retour ophaallocatie in" : "Enter return pick-up location"}
+                                    className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20"
+                                    value={customReturnFrom}
+                                    onChange={(e) => setValue("customReturnFrom", e.target.value)}
+                                  />
                                 </div>
                               )}
-                            />
 
-                            {!sameReturnLocation && (
-                              <>
-                                {/* Return From Location */}
+                              {returnFrom && (
                                 <div className="space-y-2">
-                                  <Label htmlFor="returnFrom" className="text-white font-medium">
-                                    {language === "nl" ? "Retour ophaallocatie" : "Return pick-up location"}
+                                  <Label className="text-white font-medium">
+                                    {language === "nl" ? "Volledige retour ophaallocatie" : "Full Return Pickup Location"}
                                   </Label>
                                   <Controller
-                                    name="returnFrom"
+                                    name="fullAddressReturnFrom"
                                     control={control}
                                     render={({ field }) => (
-                                      <Select 
-                                        onValueChange={(value) => {
-                                          field.onChange(value)
-                                          clearErrors("returnFrom")
-                                        }} 
-                                        value={field.value}
-                                      >
-                                        <SelectTrigger className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500">
-                                          <SelectValue placeholder={language === "nl" ? "Selecteer retour ophaallocatie" : "Select return pick-up location"} />
-                                        </SelectTrigger>
-                                        <SelectContent
-                                          className="bg-gray-800 border-gray-700 max-h-60"
-                                          position="popper"
-                                          side="bottom"
-                                          align="start"
-                                        >
-                                          {locationOptions.map((location) => (
-                                            <SelectItem
-                                              key={location}
-                                              value={location}
-                                              className="text-white hover:bg-gray-700 focus:bg-gray-700"
-                                            >
-                                              {location}
-                                            </SelectItem>
-                                          ))}
-                                          <SelectItem value="other" className="text-white hover:bg-gray-700 focus:bg-gray-700">
-                                            {language === "nl" ? "Andere locatie" : "Other location"}
-                                          </SelectItem>
-                                        </SelectContent>
-                                      </Select>
+                                      <Input
+                                        placeholder={language === "nl" ? "Bijv. Straatnaam 123, 1012 AB Amsterdam" : "E.g. Street Name 123, 1012 AB Amsterdam"}
+                                        className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20"
+                                        {...field}
+                                      />
                                     )}
                                   />
-                                  {errors.returnFrom && <p className="text-red-400 text-sm">{errors.returnFrom.message}</p>}
                                 </div>
+                              )}
 
-                                {/* Custom Return From - if "other" selected */}
-                                {returnFrom === "other" && (
-                                  <div className="space-y-2">
-                                    <Label className="text-white font-medium">
-                                      {language === "nl" ? "Aangepaste retour ophaallocatie" : "Custom return pick-up location"}
-                                    </Label>
-                                    <Input
-                                      placeholder={language === "nl" ? "Voer retour ophaallocatie in" : "Enter return pick-up location"}
-                                      className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20"
-                                      value={customFrom}
-                                      onChange={(e) => setValue("customFrom", e.target.value)}
-                                    />
-                                  </div>
-                                )}
+                              {/* Return To */}
+                              <div className="space-y-2">
+                                <Label className="text-white font-medium">
+                                  {language === "nl" ? "Retour bestemmingslocatie" : "Return drop-off location"}
+                                </Label>
+                                <Controller
+                                  name="returnTo"
+                                  control={control}
+                                  render={({ field }) => (
+                                    <Select
+                                      onValueChange={(value) => {
+                                        field.onChange(value)
+                                        clearErrors("returnTo")
+                                      }}
+                                      value={field.value}
+                                    >
+                                      <SelectTrigger className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500">
+                                        <SelectValue placeholder={language === "nl" ? "Selecteer retour bestemmingslocatie" : "Select return drop-off location"} />
+                                      </SelectTrigger>
+                                      <SelectContent className="bg-gray-800 border-gray-700 max-h-60" position="popper" side="bottom" align="start">
+                                        {locationOptions.map((location) => (
+                                          <SelectItem key={location} value={location} className="text-white hover:bg-gray-700 focus:bg-gray-700">{location}</SelectItem>
+                                        ))}
+                                        <SelectItem value="other" className="text-white hover:bg-gray-700 focus:bg-gray-700">
+                                          {language === "nl" ? "Andere locatie" : "Other location"}
+                                        </SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  )}
+                                />
+                                {errors.returnTo && <p className="text-red-400 text-sm">{errors.returnTo.message}</p>}
+                              </div>
 
-                                {/* Full Address for Return From */}
-                                {returnFrom && (
-                                  <div className="space-y-2">
-                                    <Label htmlFor="fullAddressReturnFrom" className="text-white font-medium">
-                                      {language === "nl" ? "Volledige retour ophaallocatie" : "Full Return Pickup Location"}
-                                    </Label>
-                                    <Controller
-                                      name="fullAddressReturnFrom"
-                                      control={control}
-                                      render={({ field }) => (
-                                        <Input
-                                          id="fullAddressReturnFrom"
-                                          placeholder={language === "nl" ? "Bijv. Straatnaam 123, 1012 AB Amsterdam" : "E.g. Street Name 123, 1012 AB Amsterdam"}
-                                          className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20"
-                                          {...field}
-                                        />
-                                      )}
-                                    />
-                                  </div>
-                                )}
-
-                                {/* Return To Location */}
+                              {returnTo === "other" && (
                                 <div className="space-y-2">
-                                  <Label htmlFor="returnTo" className="text-white font-medium">
-                                    {language === "nl" ? "Retour bestemmingslocatie" : "Return drop-off location"}
+                                  <Label className="text-white font-medium">
+                                    {language === "nl" ? "Aangepaste retour bestemmingslocatie" : "Custom return drop-off location"}
+                                  </Label>
+                                  <Input
+                                    placeholder={language === "nl" ? "Voer retour bestemmingslocatie in" : "Enter return drop-off location"}
+                                    className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20"
+                                    value={customReturnTo}
+                                    onChange={(e) => setValue("customReturnTo", e.target.value)}
+                                  />
+                                </div>
+                              )}
+
+                              {returnTo && (
+                                <div className="space-y-2">
+                                  <Label className="text-white font-medium">
+                                    {language === "nl" ? "Volledige retour inleverlocatie" : "Full Return Drop-off Location"}
                                   </Label>
                                   <Controller
-                                    name="returnTo"
+                                    name="fullAddressReturnTo"
                                     control={control}
                                     render={({ field }) => (
-                                      <Select 
-                                        onValueChange={(value) => {
-                                          field.onChange(value)
-                                          clearErrors("returnTo")
-                                        }} 
-                                        value={field.value}
-                                      >
-                                        <SelectTrigger className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500">
-                                          <SelectValue placeholder={language === "nl" ? "Selecteer retour bestemmingslocatie" : "Select return drop-off location"} />
-                                        </SelectTrigger>
-                                        <SelectContent
-                                          className="bg-gray-800 border-gray-700 max-h-60"
-                                          position="popper"
-                                          side="bottom"
-                                          align="start"
-                                        >
-                                          {locationOptions.map((location) => (
-                                            <SelectItem
-                                              key={location}
-                                              value={location}
-                                              className="text-white hover:bg-gray-700 focus:bg-gray-700"
-                                            >
-                                              {location}
-                                            </SelectItem>
-                                          ))}
-                                          <SelectItem value="other" className="text-white hover:bg-gray-700 focus:bg-gray-700">
-                                            {language === "nl" ? "Andere locatie" : "Other location"}
-                                          </SelectItem>
-                                        </SelectContent>
-                                      </Select>
+                                      <Input
+                                        placeholder={language === "nl" ? "Bijv. Straatnaam 123, 1012 AB Amsterdam" : "E.g. Street Name 123, 1012 AB Amsterdam"}
+                                        className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20"
+                                        {...field}
+                                      />
                                     )}
                                   />
-                                  {errors.returnTo && <p className="text-red-400 text-sm">{errors.returnTo.message}</p>}
                                 </div>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </>
+                    )}
 
-                                {/* Custom Return To - if "other" selected */}
-                                {returnTo === "other" && (
-                                  <div className="space-y-2">
-                                    <Label className="text-white font-medium">
-                                      {language === "nl" ? "Aangepaste retour bestemmingslocatie" : "Custom return drop-off location"}
-                                    </Label>
-                                    <Input
-                                      placeholder={language === "nl" ? "Voer retour bestemmingslocatie in" : "Enter return drop-off location"}
-                                      className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20"
-                                      value={customTo}
-                                      onChange={(e) => setValue("customTo", e.target.value)}
-                                    />
-                                  </div>
-                                )}
-
-                                {/* Full Address for Return To */}
-                                {returnTo && (
-                                  <div className="space-y-2">
-                                    <Label htmlFor="fullAddressReturnTo" className="text-white font-medium">
-                                      {language === "nl" ? "Volledige retour inleverlocatie" : "Full Return Drop-off Location"}
-                                    </Label>
-                                    <Controller
-                                      name="fullAddressReturnTo"
-                                      control={control}
-                                      render={({ field }) => (
-                                        <Input
-                                          id="fullAddressReturnTo"
-                                          placeholder={language === "nl" ? "Bijv. Straatnaam 123, 1012 AB Amsterdam" : "E.g. Street Name 123, 1012 AB Amsterdam"}
-                                          className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20"
-                                          {...field}
-                                        />
-                                      )}
-                                    />
-                                  </div>
-                                )}
-                              </>
-                            )}
-                          </div>
-                        </>
-                      )}
+                    {/* Hourly Service Options */}
                     {rideType === "hourly" && (
                       <>
                         <div className="space-y-2">
@@ -1560,22 +1432,11 @@ export default function BookingContent() {
                             render={({ field }) => (
                               <Select onValueChange={field.onChange} value={field.value}>
                                 <SelectTrigger className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500">
-                                  <SelectValue
-                                    placeholder={language === "nl" ? "Selecteer een dienst" : "Select a service"}
-                                  />
+                                  <SelectValue placeholder={language === "nl" ? "Selecteer een dienst" : "Select a service"} />
                                 </SelectTrigger>
-                                <SelectContent
-                                  className="bg-gray-800 border-gray-700"
-                                  position="popper"
-                                  side="bottom"
-                                  align="start"
-                                >
+                                <SelectContent className="bg-gray-800 border-gray-700" position="popper" side="bottom" align="start">
                                   {serviceTypes.map((service) => (
-                                    <SelectItem
-                                      key={service.id}
-                                      value={service.id}
-                                      className="text-white hover:bg-gray-700 focus:bg-gray-700"
-                                    >
+                                    <SelectItem key={service.id} value={service.id} className="text-white hover:bg-gray-700 focus:bg-gray-700">
                                       {service.label}
                                     </SelectItem>
                                   ))}
@@ -1588,9 +1449,7 @@ export default function BookingContent() {
 
                         {(serviceType === "corporate" || serviceType === "stand-by" || serviceType === "groups-events") && (
                           <div className="space-y-2">
-                            <Label htmlFor="hours" className="text-white font-medium">
-                              {t("booking.form.hours")}
-                            </Label>
+                            <Label htmlFor="hours" className="text-white font-medium">{t("booking.form.hours")}</Label>
                             <Controller
                               name="hours"
                               control={control}
@@ -1599,13 +1458,42 @@ export default function BookingContent() {
                                   id="hours"
                                   type="number"
                                   min="3"
-                                  className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20"
+                                  className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                   {...field}
                                   onChange={(e) => field.onChange(Number.parseInt(e.target.value))}
                                 />
                               )}
                             />
                             {errors.hours && <p className="text-red-400 text-sm">{errors.hours.message}</p>}
+                            {["e-class", "s-class", "v-class"].includes(selectedVehicle) && hours && hours >= 3 && (
+                              <div className="bg-gradient-to-r from-green-500/10 to-teal-500/10 border border-green-500/30 rounded-xl p-6">
+                                <div className="flex items-center justify-between flex-wrap gap-4">
+                                  <div>
+                                    <h4 className="text-lg font-semibold text-white mb-1">
+                                      {language === "nl" ? "Totale prijs" : "Total Price"}
+                                    </h4>
+                                    <p className="text-gray-400 text-sm">
+                                      {hourlyPricing[selectedVehicle]} €/u × {hours} {language === "nl" ? "uur" : "hrs"}
+                                    </p>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="text-4xl font-bold text-green-400">
+                                      € {hourlyPricing[selectedVehicle] * hours}
+                                    </p>
+                                  </div>
+                                </div>
+                                {/* Quick hour selector pills */}
+                                <div className="mt-4 flex flex-wrap gap-2">
+                                  {[3, 4, 5, 6, 8, 10].map((h) => (
+                                    <button key={h} type="button" onClick={() => setValue("hours", h)}
+                                      className={cn("px-3 py-1 rounded-full text-sm font-medium transition-all",
+                                        hours === h ? "bg-green-500 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600")}>
+                                      {h}u — €{hourlyPricing[selectedVehicle] * h}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         )}
 
@@ -1620,29 +1508,15 @@ export default function BookingContent() {
                               render={({ field }) => (
                                 <Select onValueChange={field.onChange} value={field.value}>
                                   <SelectTrigger className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500">
-                                    <SelectValue
-                                      placeholder={language === "nl" ? "Kies een bestemming" : "Choose a destination"}
-                                    />
+                                    <SelectValue placeholder={language === "nl" ? "Kies een bestemming" : "Choose a destination"} />
                                   </SelectTrigger>
-                                  <SelectContent
-                                    className="bg-gray-800 border-gray-700"
-                                    position="popper"
-                                    side="bottom"
-                                    align="start"
-                                  >
+                                  <SelectContent className="bg-gray-800 border-gray-700" position="popper" side="bottom" align="start">
                                     {sightseeingLocations.map((location, index) => (
-                                      <SelectItem
-                                        key={index}
-                                        value={location}
-                                        className="text-white hover:bg-gray-700 focus:bg-gray-700"
-                                      >
+                                      <SelectItem key={index} value={location} className="text-white hover:bg-gray-700 focus:bg-gray-700">
                                         {location}
                                       </SelectItem>
                                     ))}
-                                    <SelectItem
-                                      value="other"
-                                      className="text-white hover:bg-gray-700 focus:bg-gray-700"
-                                    >
+                                    <SelectItem value="other" className="text-white hover:bg-gray-700 focus:bg-gray-700">
                                       {t("booking.form.other_loc")}
                                     </SelectItem>
                                   </SelectContent>
@@ -1663,9 +1537,7 @@ export default function BookingContent() {
                               render={({ field }) => (
                                 <Input
                                   id="otherLoc"
-                                  placeholder={
-                                    language === "nl" ? "Voer uw gewenste locatie in" : "Enter your preferred location"
-                                  }
+                                  placeholder={language === "nl" ? "Voer uw gewenste locatie in" : "Enter your preferred location"}
                                   className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20"
                                   {...field}
                                 />
@@ -1684,24 +1556,11 @@ export default function BookingContent() {
                                 render={({ field }) => (
                                   <Select onValueChange={field.onChange} value={field.value}>
                                     <SelectTrigger className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500">
-                                      <SelectValue
-                                        placeholder={
-                                          language === "nl" ? "Selecteer een tourplan" : "Select a tour plan"
-                                        }
-                                      />
+                                      <SelectValue placeholder={language === "nl" ? "Selecteer een tourplan" : "Select a tour plan"} />
                                     </SelectTrigger>
-                                    <SelectContent
-                                      className="bg-gray-800 border-gray-700"
-                                      position="popper"
-                                      side="bottom"
-                                      align="start"
-                                    >
+                                    <SelectContent className="bg-gray-800 border-gray-700" position="popper" side="bottom" align="start">
                                       {touringPlans.map((plan) => (
-                                        <SelectItem
-                                          key={plan.id}
-                                          value={plan.id}
-                                          className="text-white hover:bg-gray-700 focus:bg-gray-700"
-                                        >
+                                        <SelectItem key={plan.id} value={plan.id} className="text-white hover:bg-gray-700 focus:bg-gray-700">
                                           {plan.label}
                                         </SelectItem>
                                       ))}
@@ -1709,9 +1568,7 @@ export default function BookingContent() {
                                   </Select>
                                 )}
                               />
-                              {errors.touringPlan && (
-                                <p className="text-red-400 text-sm">{errors.touringPlan.message}</p>
-                              )}
+                              {errors.touringPlan && <p className="text-red-400 text-sm">{errors.touringPlan.message}</p>}
                             </div>
 
                             {touringPlan === "other" && (
@@ -1732,9 +1589,7 @@ export default function BookingContent() {
                                     />
                                   )}
                                 />
-                                {errors.customTourDetails && (
-                                  <p className="text-red-400 text-sm">{errors.customTourDetails.message}</p>
-                                )}
+                                {errors.customTourDetails && <p className="text-red-400 text-sm">{errors.customTourDetails.message}</p>}
                               </div>
                             )}
                           </div>
@@ -1742,8 +1597,9 @@ export default function BookingContent() {
                       </>
                     )}
 
-                    {(rideType === "one_way" || rideType === "round_trip") && 
-                      (selectedVehicle === "e-class" || selectedVehicle === "s-class" || selectedVehicle === "v-class") && 
+                    {/* Estimated price (one_way / round_trip) */}
+                    {(rideType === "one_way" || rideType === "round_trip") &&
+                      (selectedVehicle === "e-class" || selectedVehicle === "s-class" || selectedVehicle === "v-class") &&
                       estimatedPrice !== null && (
                         <div className="bg-gradient-to-r from-green-500/10 to-teal-500/10 border border-green-500/30 rounded-xl p-6">
                           <div className="flex items-center justify-between">
@@ -1767,7 +1623,7 @@ export default function BookingContent() {
                         </div>
                       )}
 
-                    {/* Luggage Type Selection */}
+                    {/* Luggage Type */}
                     <div className="space-y-4">
                       <Label className="text-white font-medium flex items-center gap-2">
                         <Luggage className="w-4 h-4" />
@@ -1812,10 +1668,13 @@ export default function BookingContent() {
                       {errors.handLuggage && <p className="text-red-400 text-sm">{errors.handLuggage.message}</p>}
                     </div>
 
+                    {/* Baggage */}
                     <div className="space-y-2">
                       <Label htmlFor="baggage" className="text-white font-medium flex items-center gap-2">
                         <Luggage className="w-4 h-4" />
-                        {language === "nl" ? `Aantal bagage (0-${vehicles.find(v => v.id === selectedVehicle)?.luggage || 20})` : `Number of Luggage (0-${vehicles.find(v => v.id === selectedVehicle)?.luggage || 20})`}
+                        {language === "nl"
+                          ? `Aantal bagage (0-${vehicles.find((v) => v.id === selectedVehicle)?.luggage || 20})`
+                          : `Number of Luggage (0-${vehicles.find((v) => v.id === selectedVehicle)?.luggage || 20})`}
                       </Label>
                       <Controller
                         name="baggage"
@@ -1826,17 +1685,11 @@ export default function BookingContent() {
                             type="number"
                             min="0"
                             className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                            placeholder={
-                              language === "nl" ? "Voer aantal bagage stukken in" : "Enter number of luggage pieces"
-                            }
+                            placeholder={language === "nl" ? "Voer aantal bagage stukken in" : "Enter number of luggage pieces"}
                             value={field.value || ""}
                             onChange={(e) => {
-                              const value = e.target.value ? Number.parseInt(e.target.value) : 0
-                              field.onChange(value)
-                              // Clear error when user starts typing
-                              if (errors.baggage) {
-                                clearErrors("baggage")
-                              }
+                              field.onChange(e.target.value ? Number.parseInt(e.target.value) : 0)
+                              if (errors.baggage) clearErrors("baggage")
                             }}
                           />
                         )}
@@ -1844,10 +1697,13 @@ export default function BookingContent() {
                       {errors.baggage && <p className="text-red-400 text-sm font-semibold">{errors.baggage.message}</p>}
                     </div>
 
+                    {/* Passengers */}
                     <div className="space-y-2">
                       <Label htmlFor="passengers" className="text-white font-medium flex items-center gap-2">
                         <User className="w-4 h-4" />
-                        {language === "nl" ? `Aantal passagiers (1-${vehicles.find(v => v.id === selectedVehicle)?.passengers || 89})` : `Number of Passengers (1-${vehicles.find(v => v.id === selectedVehicle)?.passengers || 89})`}
+                        {language === "nl"
+                          ? `Aantal passagiers (1-${vehicles.find((v) => v.id === selectedVehicle)?.passengers || 89})`
+                          : `Number of Passengers (1-${vehicles.find((v) => v.id === selectedVehicle)?.passengers || 89})`}
                       </Label>
                       <Controller
                         name="passengers"
@@ -1861,12 +1717,8 @@ export default function BookingContent() {
                             placeholder={language === "nl" ? "Voer aantal passagiers in" : "Enter number of passengers"}
                             value={field.value || ""}
                             onChange={(e) => {
-                              const value = e.target.value ? Number.parseInt(e.target.value) : 1
-                              field.onChange(value)
-                              // Clear error when user starts typing
-                              if (errors.passengers) {
-                                clearErrors("passengers")
-                              }
+                              field.onChange(e.target.value ? Number.parseInt(e.target.value) : 1)
+                              if (errors.passengers) clearErrors("passengers")
                             }}
                           />
                         )}
@@ -1874,10 +1726,9 @@ export default function BookingContent() {
                       {errors.passengers && <p className="text-red-400 text-sm font-semibold">{errors.passengers.message}</p>}
                     </div>
 
+                    {/* Remarks */}
                     <div className="space-y-2">
-                      <Label htmlFor="remarks" className="text-white font-medium">
-                        {t("booking.form.remarks")}
-                      </Label>
+                      <Label htmlFor="remarks" className="text-white font-medium">{t("booking.form.remarks")}</Label>
                       <Controller
                         name="remarks"
                         control={control}
@@ -1886,11 +1737,7 @@ export default function BookingContent() {
                             id="remarks"
                             rows={4}
                             className="bg-gray-800 border-gray-700 text-white rounded-lg focus:border-orange-500 focus:ring-orange-500/20 resize-none"
-                            placeholder={
-                              language === "nl"
-                                ? "Speciale verzoeken of aanvullende informatie..."
-                                : "Any special requests or additional information..."
-                            }
+                            placeholder={language === "nl" ? "Speciale verzoeken of aanvullende informatie..." : "Any special requests or additional information..."}
                             {...field}
                           />
                         )}
@@ -1900,20 +1747,19 @@ export default function BookingContent() {
                 </div>
               </div>
 
-             
-
-              {/* Step 3: Quote Request Summary */}
+              {/* ══════════════════════════════════════
+                  STEP 3: Summary + Contact + Payment
+              ══════════════════════════════════════ */}
               <div className={cn("transition-all duration-500", step !== 3 && "hidden")}>
                 <div className="p-8 md:p-12">
                   <h3 className="text-3xl font-bold mb-8 text-white">
-                    {estimatedPrice !== null 
+                    {estimatedPrice !== null
                       ? (language === "nl" ? "Boek Nu" : "Book Now")
-                      : t("booking.step3.title")
-                    }
+                      : t("booking.step3.title")}
                   </h3>
 
                   <div className="space-y-8">
-                     {/* Vehicle Selection */}
+                    {/* Selected Vehicle */}
                     {selectedVehicle && (
                       <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
                         <h4 className="text-xl font-semibold text-white mb-4 flex items-center gap-3">
@@ -1930,28 +1776,20 @@ export default function BookingContent() {
                             />
                           </div>
                           <div>
-                            <p className="text-white font-semibold">
-                              {vehicles.find((v) => v.id === selectedVehicle)?.name}
-                            </p>
-                            <p className="text-orange-400 text-sm">
-                              {vehicles.find((v) => v.id === selectedVehicle)?.type}
-                            </p>
+                            <p className="text-white font-semibold">{vehicles.find((v) => v.id === selectedVehicle)?.name}</p>
+                            <p className="text-orange-400 text-sm">{vehicles.find((v) => v.id === selectedVehicle)?.type}</p>
                             {selectedVehicle === "coach" && coachCapacity && (
                               <p className="text-gray-400 text-sm">
-                                {language === "nl" ? "Capaciteit:" : "Capacity:"} {coachCapacity}{" "}
-                                {language === "nl" ? "personen" : "people"}
+                                {language === "nl" ? "Capaciteit:" : "Capacity:"} {coachCapacity} {language === "nl" ? "personen" : "people"}
                               </p>
                             )}
-                            {selectedVehicle === "sprinter" && sprinterCapacity && (  // YE ADD KARO
+                            {selectedVehicle === "sprinter" && sprinterCapacity && (
                               <p className="text-gray-400 text-sm">
-                                {language === "nl" ? "Capaciteit:" : "Capacity:"} {sprinterCapacity}{" "}
-                                {language === "nl" ? "zitplaatsen" : "seater"}
+                                {language === "nl" ? "Capaciteit:" : "Capacity:"} {sprinterCapacity} {language === "nl" ? "zitplaatsen" : "seater"}
                               </p>
                             )}
                             {selectedVehicle === "sprinter" && formData.sprinterTrailer && (
-                              <p className="text-gray-400 text-sm">
-                                {language === "nl" ? "Met aanhangwagen" : "With trailer"}
-                              </p>
+                              <p className="text-gray-400 text-sm">{language === "nl" ? "Met aanhangwagen" : "With trailer"}</p>
                             )}
                           </div>
                         </div>
@@ -1966,47 +1804,41 @@ export default function BookingContent() {
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-300">
                         <div>
-                          <span className="text-gray-400">{language === "nl" ? "Type:" : "Type:"}</span>{" "}
+                          <span className="text-gray-400">Type:</span>{" "}
                           {formData.rideType === "one_way"
                             ? t("booking.ride_type.one_way")
                             : formData.rideType === "round_trip"
-                            ? t("booking.ride_type.round_trip")
-                            : t("booking.ride_type.hourly")}
+                              ? t("booking.ride_type.round_trip")
+                              : t("booking.ride_type.hourly")}
                         </div>
-                        <div>
-                          <span className="text-gray-400">{t("booking.form.date")}:</span> {formData.date}
-                        </div>
-                        <div>
-                          <span className="text-gray-400">{t("booking.form.time")}:</span> {formData.time}
-                        </div>
+                        <div><span className="text-gray-400">{t("booking.form.date")}:</span> {formData.date}</div>
+                        <div><span className="text-gray-400">{t("booking.form.time")}:</span> {formData.time}</div>
                         {formData.returnDate && (
-                          <div>
-                            <span className="text-gray-400">{t("booking.form.return_date")}:</span> {formData.returnDate}
-                          </div>
+                          <div><span className="text-gray-400">{t("booking.form.return_date")}:</span> {formData.returnDate}</div>
                         )}
                         {formData.returnTime && (
-                          <div>
-                            <span className="text-gray-400">{t("booking.form.return_time")}:</span> {formData.returnTime}
-                          </div>
+                          <div><span className="text-gray-400">{t("booking.form.return_time")}:</span> {formData.returnTime}</div>
                         )}
                         <div>
-                          <span className="text-gray-400">{t("booking.form.from")}:</span> {formData.from === "other" ? formData.customFrom : formData.from}
+                          <span className="text-gray-400">{t("booking.form.from")}:</span>{" "}
+                          {formData.from === "other" ? formData.customFrom : formData.from}
                         </div>
                         {formData.to && (
                           <div>
-                            <span className="text-gray-400">{t("booking.form.to")}:</span> {formData.to === "other" ? formData.customTo : formData.to}
+                            <span className="text-gray-400">{t("booking.form.to")}:</span>{" "}
+                            {formData.to === "other" ? formData.customTo : formData.to}
                           </div>
                         )}
-                        
-                        {/* RETURN LOCATIONS - YAHAN MOVE KARO */}
                         {formData.rideType === "round_trip" && !sameReturnLocation && formData.returnFrom && (
                           <div>
-                            <span className="text-gray-400">{language === "nl" ? "Retour ophalen vanaf:" : "Return pick-up from:"}</span> {formData.returnFrom}
+                            <span className="text-gray-400">{language === "nl" ? "Retour ophalen vanaf:" : "Return pick-up from:"}</span>{" "}
+                            {formData.returnFrom}
                           </div>
                         )}
                         {formData.rideType === "round_trip" && !sameReturnLocation && formData.returnTo && (
                           <div>
-                            <span className="text-gray-400">{language === "nl" ? "Retour afzetten bij:" : "Return drop-off at:"}</span> {formData.returnTo}
+                            <span className="text-gray-400">{language === "nl" ? "Retour afzetten bij:" : "Return drop-off at:"}</span>{" "}
+                            {formData.returnTo}
                           </div>
                         )}
                         {formData.rideType === "round_trip" && sameReturnLocation && (
@@ -2015,12 +1847,8 @@ export default function BookingContent() {
                             <span className="text-green-400">{language === "nl" ? "Zelfde route (omgekeerd)" : "Same route (reversed)"}</span>
                           </div>
                         )}
-
                         {formData.hours && (serviceType === "corporate" || serviceType === "stand-by" || serviceType === "groups-events") && (
-                          <div>
-                            <span className="text-gray-400">{t("booking.form.hours")}:</span> {formData.hours}{" "}
-                            {t("hours:")}
-                          </div>
+                          <div><span className="text-gray-400">{t("booking.form.hours")}:</span> {formData.hours} {t("hours:")}</div>
                         )}
                         {formData.serviceType && (
                           <div>
@@ -2033,20 +1861,15 @@ export default function BookingContent() {
                           {[
                             handLuggage && (language === "nl" ? "Handbagage" : "Hand luggage"),
                             checkedLuggage && (language === "nl" ? "Ruimbagage" : "Checked luggage"),
-                          ]
-                            .filter(Boolean)
-                            .join(", ")}
+                          ].filter(Boolean).join(", ")}
                         </div>
                         <div>
-                          <span className="text-gray-400">{t("fleet.luggage")}:</span> {formData.baggage || 0}{" "}
-                          {t("pieces")}
+                          <span className="text-gray-400">{t("fleet.luggage")}:</span> {formData.baggage || 0} {t("pieces")}
                         </div>
                         <div>
-                          <span className="text-gray-400">{language === "nl" ? "Passagiers:" : "Passengers:"}</span>{" "}
-                          {formData.passengers || 0}
+                          <span className="text-gray-400">{language === "nl" ? "Passagiers:" : "Passengers:"}</span> {formData.passengers || 0}
                         </div>
 
-                        {/* ESTIMATED PRICE - END MEIN */}
                         {estimatedPrice !== null && (
                           <div className="md:col-span-2">
                             <div className="bg-gradient-to-r from-green-500/10 to-teal-500/10 border border-green-500/30 rounded-lg p-4 mt-4">
@@ -2074,35 +1897,23 @@ export default function BookingContent() {
                       <div className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div className="space-y-2">
-                            <Label htmlFor="firstName" className="text-white font-medium">
-                              {t("booking.form.first_name")} *
-                            </Label>
+                            <Label htmlFor="firstName" className="text-white font-medium">{t("booking.form.first_name")} *</Label>
                             <Controller
                               name="firstName"
                               control={control}
                               render={({ field }) => (
-                                <Input
-                                  id="firstName"
-                                  className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20"
-                                  {...field}
-                                />
+                                <Input id="firstName" className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20" {...field} />
                               )}
                             />
                             {errors.firstName && <p className="text-red-400 text-sm">{errors.firstName.message}</p>}
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="lastName" className="text-white font-medium">
-                              {t("booking.form.last_name")} *
-                            </Label>
+                            <Label htmlFor="lastName" className="text-white font-medium">{t("booking.form.last_name")} *</Label>
                             <Controller
                               name="lastName"
                               control={control}
                               render={({ field }) => (
-                                <Input
-                                  id="lastName"
-                                  className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20"
-                                  {...field}
-                                />
+                                <Input id="lastName" className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20" {...field} />
                               )}
                             />
                             {errors.lastName && <p className="text-red-400 text-sm">{errors.lastName.message}</p>}
@@ -2110,65 +1921,101 @@ export default function BookingContent() {
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="phone" className="text-white font-medium flex items-center gap-2">
-                            <Phone className="w-4 h-4" />
-                            {t("booking.form.phone")} *
+                            <Phone className="w-4 h-4" />{t("booking.form.phone")} *
                           </Label>
                           <Controller
                             name="phone"
                             control={control}
                             render={({ field }) => (
-                              <Input
-                                id="phone"
-                                type="tel"
-                                className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20"
-                                {...field}
-                              />
+                              <Input id="phone" type="tel" className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20" {...field} />
                             )}
                           />
                           {errors.phone && <p className="text-red-400 text-sm">{errors.phone.message}</p>}
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="email" className="text-white font-medium flex items-center gap-2">
-                            <Mail className="w-4 h-4" />
-                            {t("booking.form.email")} *
+                            <Mail className="w-4 h-4" />{t("booking.form.email")} *
                           </Label>
                           <Controller
                             name="email"
                             control={control}
                             render={({ field }) => (
-                              <Input
-                                id="email"
-                                type="email"
-                                className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20"
-                                {...field}
-                              />
+                              <Input id="email" type="email" className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20" {...field} />
                             )}
                           />
                           {errors.email && <p className="text-red-400 text-sm">{errors.email.message}</p>}
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="company" className="text-white font-medium">
-                            {t("booking.form.company")}
-                          </Label>
+                          <Label htmlFor="company" className="text-white font-medium">{t("booking.form.company")}</Label>
                           <Controller
                             name="company"
                             control={control}
                             render={({ field }) => (
-                              <Input
-                                id="company"
-                                className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20"
-                                {...field}
-                              />
+                              <Input id="company" className="bg-gray-800 border-gray-700 text-white h-12 rounded-lg focus:border-orange-500 focus:ring-orange-500/20" {...field} />
                             )}
                           />
                         </div>
                       </div>
                     </div>
+
+                    {/* Payment Options Panel (only when price available) */}
+                    {estimatedPrice !== null && (
+                      <div className="bg-gradient-to-br from-blue-500/5 to-purple-500/5 border border-blue-500/20 rounded-xl p-6">
+                        <h4 className="text-xl font-semibold text-white mb-2 flex items-center gap-3">
+                          <CreditCard className="w-5 h-5 text-blue-400" />
+                          {language === "nl" ? "Hoe wilt u betalen?" : "How would you like to proceed?"}
+                        </h4>
+                        <p className="text-gray-400 text-sm mb-6">
+                          {language === "nl"
+                            ? "U kunt direct online betalen of een offerte aanvragen zonder betaling."
+                            : "You can pay online now or request a quote without payment."}
+                        </p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="bg-gray-800/60 rounded-xl p-5 border border-green-500/30">
+                            <div className="flex items-center gap-2 mb-2">
+                              <CreditCard className="w-5 h-5 text-green-400" />
+                              <span className="text-white font-semibold text-lg">
+                                {language === "nl" ? "Direct Betalen" : "Pay Now"}
+                              </span>
+                            </div>
+                            <p className="text-gray-400 text-sm mb-1">
+                              {language === "nl" ? "Totaal:" : "Total:"}{" "}
+                              <span className="text-green-400 font-bold text-xl">€ {estimatedPrice}</span>
+                            </p>
+                            <p className="text-gray-500 text-xs mb-3">
+                              {language === "nl"
+                                ? "Veilig betalen via Stripe (iDEAL, Creditcard)"
+                                : "Secure payment via Stripe (iDEAL, Credit card)"}
+                            </p>
+                            <div className="flex gap-2 text-xs text-gray-500">
+                              <span className="bg-gray-700 px-2 py-1 rounded">iDEAL</span>
+                              <span className="bg-gray-700 px-2 py-1 rounded">Visa</span>
+                              <span className="bg-gray-700 px-2 py-1 rounded">Mastercard</span>
+                            </div>
+                          </div>
+                          <div className="bg-gray-800/60 rounded-xl p-5 border border-orange-500/30">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Send className="w-5 h-5 text-orange-400" />
+                              <span className="text-white font-semibold text-lg">
+                                {language === "nl" ? "Offerte Aanvragen" : "Request Quote"}
+                              </span>
+                            </div>
+                            <p className="text-gray-400 text-sm">
+                              {language === "nl"
+                                ? "Wij nemen contact met u op met een gedetailleerde offerte. Geen betaling vereist."
+                                : "We'll contact you with a detailed quote. No payment required."}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
 
-              {/* Navigation */}
+              {/* ══════════════════════════════════════
+                  NAVIGATION BUTTONS
+              ══════════════════════════════════════ */}
               <div className="px-8 md:px-12 pb-8 md:pb-12">
                 <div className="flex justify-between items-center pt-8 border-t border-gray-800">
                   {step > 1 && step < 4 && (
@@ -2182,7 +2029,9 @@ export default function BookingContent() {
                       {t("booking.form.back")}
                     </Button>
                   )}
-                  <div className={cn(step === 1 && "ml-auto")}>
+
+                  <div className={cn("flex gap-3", step === 1 && "ml-auto")}>
+                    {/* Steps 1 & 2: Next */}
                     {step < 3 && (
                       <Button
                         type="button"
@@ -2193,7 +2042,53 @@ export default function BookingContent() {
                         <ArrowRight className="w-5 h-5" />
                       </Button>
                     )}
-                    {step === 3 && (
+
+                    {/* Step 3 WITH price → Request Quote + Pay Now */}
+                    {step === 3 && estimatedPrice !== null && (
+                      <>
+                        {/* Request Quote (email only) */}
+                        <Button
+                          type="submit"
+                          disabled={isSubmitting || isRedirectingToStripe}
+                          className="bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold hover:from-orange-600 hover:to-yellow-600 px-5 py-3 rounded-lg text-base disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        >
+                          {isSubmitting ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              {language === "nl" ? "Verzenden..." : "Sending..."}
+                            </>
+                          ) : (
+                            <>
+                              <Send className="w-4 h-4" />
+                              {language === "nl" ? "Offerte Aanvragen" : "Request Quote"}
+                            </>
+                          )}
+                        </Button>
+
+                        {/* Pay Now → Stripe */}
+                        <Button
+                          type="button"
+                          disabled={isSubmitting || isRedirectingToStripe}
+                          onClick={handleSubmit(handlePayNow)}
+                          className="bg-gradient-to-r from-green-500 to-teal-500 text-white font-bold hover:from-green-600 hover:to-teal-600 px-5 py-3 rounded-lg text-base disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        >
+                          {isRedirectingToStripe ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              {language === "nl" ? "Laden..." : "Loading..."}
+                            </>
+                          ) : (
+                            <>
+                              <CreditCard className="w-4 h-4" />
+                              {language === "nl" ? `Nu Betalen € ${estimatedPrice}` : `Pay Now € ${estimatedPrice}`}
+                            </>
+                          )}
+                        </Button>
+                      </>
+                    )}
+
+                    {/* Step 3 WITHOUT price → single submit */}
+                    {step === 3 && estimatedPrice === null && (
                       <Button
                         type="submit"
                         disabled={isSubmitting}
@@ -2205,15 +2100,14 @@ export default function BookingContent() {
                             {language === "nl" ? "Bezig met laden..." : "Loading..."}
                           </>
                         ) : (
-                          estimatedPrice !== null 
-                            ? (language === "nl" ? "Nu Boeken" : "Book Now")
-                            : t("booking.form.submit")
+                          t("booking.form.submit")
                         )}
                       </Button>
                     )}
                   </div>
                 </div>
               </div>
+
             </form>
           </div>
         </div>
