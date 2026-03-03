@@ -13,7 +13,6 @@ const GoogleMapsContext = createContext<GoogleMapsContextType>({
   isLoaded: false,
   loadError: undefined,
 })
-
 export function useGoogleMaps() {
   return useContext(GoogleMapsContext)
 }
