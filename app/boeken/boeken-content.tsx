@@ -291,6 +291,7 @@ export default function BookingContent() {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isRedirectingToStripe, setIsRedirectingToStripe] = useState(false)
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<"pay_now" | "quote">("pay_now")
   const fadeInRef = useFadeIn()
   const searchParams = useSearchParams()
   const preSelectedVehicle = searchParams.get("vehicle")
@@ -1960,55 +1961,94 @@ export default function BookingContent() {
 
                     {/* Payment Options Panel (only when price available) */}
                     {estimatedPrice !== null && (
-                      <div className="bg-gradient-to-br from-blue-500/5 to-purple-500/5 border border-blue-500/20 rounded-xl p-6">
-                        <h4 className="text-xl font-semibold text-white mb-2 flex items-center gap-3">
-                          <CreditCard className="w-5 h-5 text-blue-400" />
-                          {language === "nl" ? "Hoe wilt u betalen?" : "How would you like to proceed?"}
-                        </h4>
-                        <p className="text-gray-400 text-sm mb-6">
-                          {language === "nl"
-                            ? "U kunt direct online betalen of een offerte aanvragen zonder betaling."
-                            : "You can pay online now or request a quote without payment."}
-                        </p>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="bg-gray-800/60 rounded-xl p-5 border border-green-500/30">
-                            <div className="flex items-center gap-2 mb-2">
-                              <CreditCard className="w-5 h-5 text-green-400" />
+                    <div className="bg-gradient-to-br from-blue-500/5 to-purple-500/5 border border-blue-500/20 rounded-xl p-6">
+                      <h4 className="text-xl font-semibold text-white mb-2 flex items-center gap-3">
+                        <CreditCard className="w-5 h-5 text-blue-400" />
+                        {language === "nl" ? "Hoe wilt u betalen?" : "How would you like to proceed?"}
+                      </h4>
+                      <p className="text-gray-400 text-sm mb-6">
+                        {language === "nl"
+                          ? "U kunt direct online betalen of een offerte aanvragen zonder betaling."
+                          : "You can pay online now or request a quote without payment."}
+                      </p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                        {/* Pay Now option */}
+                        <button
+                          type="button"
+                          onClick={() => setSelectedPaymentMethod("pay_now")}
+                          className={cn(
+                            "rounded-xl p-5 border-2 text-left transition-all duration-200 cursor-pointer",
+                            selectedPaymentMethod === "pay_now"
+                              ? "border-green-500 bg-green-500/10 shadow-lg shadow-green-500/20 scale-[1.02]"
+                              : "border-gray-700 bg-gray-800/60 hover:border-gray-500"
+                          )}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <CreditCard className={cn("w-5 h-5", selectedPaymentMethod === "pay_now" ? "text-green-400" : "text-gray-400")} />
                               <span className="text-white font-semibold text-lg">
                                 {language === "nl" ? "Direct Betalen" : "Pay Now"}
                               </span>
                             </div>
-                            <p className="text-gray-400 text-sm mb-1">
-                              {language === "nl" ? "Totaal:" : "Total:"}{" "}
-                              <span className="text-green-400 font-bold text-xl">€ {estimatedPrice}</span>
-                            </p>
-                            <p className="text-gray-500 text-xs mb-3">
-                              {language === "nl"
-                                ? "Veilig betalen via Stripe (iDEAL, Creditcard)"
-                                : "Secure payment via Stripe (iDEAL, Credit card)"}
-                            </p>
-                            <div className="flex gap-2 text-xs text-gray-500">
-                              <span className="bg-gray-700 px-2 py-1 rounded">iDEAL</span>
-                              <span className="bg-gray-700 px-2 py-1 rounded">Visa</span>
-                              <span className="bg-gray-700 px-2 py-1 rounded">Mastercard</span>
+                            <div className={cn(
+                              "w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all",
+                              selectedPaymentMethod === "pay_now" ? "border-green-500 bg-green-500" : "border-gray-600"
+                            )}>
+                              {selectedPaymentMethod === "pay_now" && <Check className="w-3 h-3 text-white" />}
                             </div>
                           </div>
-                          <div className="bg-gray-800/60 rounded-xl p-5 border border-orange-500/30">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Send className="w-5 h-5 text-orange-400" />
+                          <p className="text-gray-400 text-sm mb-1">
+                            {language === "nl" ? "Totaal:" : "Total:"}{" "}
+                            <span className="text-green-400 font-bold text-xl">€ {estimatedPrice}</span>
+                          </p>
+                          <p className="text-gray-500 text-xs mb-3">
+                            {language === "nl"
+                              ? "Veilig betalen via Stripe (iDEAL, Creditcard)"
+                              : "Secure payment via Stripe (iDEAL, Credit card)"}
+                          </p>
+                          <div className="flex gap-2 text-xs text-gray-500">
+                            <span className="bg-gray-700 px-2 py-1 rounded">iDEAL</span>
+                            <span className="bg-gray-700 px-2 py-1 rounded">Visa</span>
+                            <span className="bg-gray-700 px-2 py-1 rounded">Mastercard</span>
+                          </div>
+                        </button>
+
+                        {/* Request Quote option */}
+                        <button
+                          type="button"
+                          onClick={() => setSelectedPaymentMethod("quote")}
+                          className={cn(
+                            "rounded-xl p-5 border-2 text-left transition-all duration-200 cursor-pointer",
+                            selectedPaymentMethod === "quote"
+                              ? "border-orange-500 bg-orange-500/10 shadow-lg shadow-orange-500/20 scale-[1.02]"
+                              : "border-gray-700 bg-gray-800/60 hover:border-gray-500"
+                          )}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <Send className={cn("w-5 h-5", selectedPaymentMethod === "quote" ? "text-orange-400" : "text-gray-400")} />
                               <span className="text-white font-semibold text-lg">
                                 {language === "nl" ? "Offerte Aanvragen" : "Request Quote"}
                               </span>
                             </div>
-                            <p className="text-gray-400 text-sm">
-                              {language === "nl"
-                                ? "Wij nemen contact met u op met een gedetailleerde offerte. Geen betaling vereist."
-                                : "We'll contact you with a detailed quote. No payment required."}
-                            </p>
+                            <div className={cn(
+                              "w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all",
+                              selectedPaymentMethod === "quote" ? "border-orange-500 bg-orange-500" : "border-gray-600"
+                            )}>
+                              {selectedPaymentMethod === "quote" && <Check className="w-3 h-3 text-white" />}
+                            </div>
                           </div>
-                        </div>
+                          <p className="text-gray-400 text-sm">
+                            {language === "nl"
+                              ? "Wij nemen contact met u op met een gedetailleerde offerte. Geen betaling vereist."
+                              : "We'll contact you with a detailed quote. No payment required."}
+                          </p>
+                        </button>
+
                       </div>
-                    )}
+                    </div>
+                  )}
                   </div>
                 </div>
               </div>
@@ -2046,44 +2086,34 @@ export default function BookingContent() {
                     {/* Step 3 WITH price → Request Quote + Pay Now */}
                     {step === 3 && estimatedPrice !== null && (
                       <>
-                        {/* Request Quote (email only) */}
-                        <Button
-                          type="submit"
-                          disabled={isSubmitting || isRedirectingToStripe}
-                          className="bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold hover:from-orange-600 hover:to-yellow-600 px-5 py-3 rounded-lg text-base disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                        >
-                          {isSubmitting ? (
-                            <>
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                              {language === "nl" ? "Verzenden..." : "Sending..."}
-                            </>
-                          ) : (
-                            <>
-                              <Send className="w-4 h-4" />
-                              {language === "nl" ? "Offerte Aanvragen" : "Request Quote"}
-                            </>
-                          )}
-                        </Button>
-
-                        {/* Pay Now → Stripe */}
-                        <Button
-                          type="button"
-                          disabled={isSubmitting || isRedirectingToStripe}
-                          onClick={handleSubmit(handlePayNow)}
-                          className="bg-gradient-to-r from-green-500 to-teal-500 text-white font-bold hover:from-green-600 hover:to-teal-600 px-5 py-3 rounded-lg text-base disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                        >
-                          {isRedirectingToStripe ? (
-                            <>
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                              {language === "nl" ? "Laden..." : "Loading..."}
-                            </>
-                          ) : (
-                            <>
-                              <CreditCard className="w-4 h-4" />
-                              {language === "nl" ? `Nu Betalen € ${estimatedPrice}` : `Pay Now € ${estimatedPrice}`}
-                            </>
-                          )}
-                        </Button>
+                        {selectedPaymentMethod === "quote" ? (
+                          /* Request Quote button */
+                          <Button
+                            type="submit"
+                            disabled={isSubmitting || isRedirectingToStripe}
+                            className="bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold hover:from-orange-600 hover:to-yellow-600 px-5 py-3 rounded-lg text-base disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                          >
+                            {isSubmitting ? (
+                              <><Loader2 className="w-4 h-4 animate-spin" />{language === "nl" ? "Verzenden..." : "Sending..."}</>
+                            ) : (
+                              <><Send className="w-4 h-4" />{language === "nl" ? "Offerte Aanvragen" : "Request Quote"}</>
+                            )}
+                          </Button>
+                        ) : (
+                          /* Pay Now button */
+                          <Button
+                            type="button"
+                            disabled={isSubmitting || isRedirectingToStripe}
+                            onClick={handleSubmit(handlePayNow)}
+                            className="bg-gradient-to-r from-green-500 to-teal-500 text-white font-bold hover:from-green-600 hover:to-teal-600 px-5 py-3 rounded-lg text-base disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                          >
+                            {isRedirectingToStripe ? (
+                              <><Loader2 className="w-4 h-4 animate-spin" />{language === "nl" ? "Laden..." : "Loading..."}</>
+                            ) : (
+                              <><CreditCard className="w-4 h-4" />{language === "nl" ? `Nu Betalen € ${estimatedPrice}` : `Pay Now € ${estimatedPrice}`}</>
+                            )}
+                          </Button>
+                        )}
                       </>
                     )}
 

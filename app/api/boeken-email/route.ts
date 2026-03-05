@@ -89,10 +89,12 @@ export async function POST(request: NextRequest) {
 
     // Determine if this is a groups & events booking
     const isGroupEvents = bookingType === "group_events"
+    const isPaid = !!(body as any).paymentInfo?.paid
+    const paidAmount = (body as any).paymentInfo?.amount ?? 0
 
     const subjects = {
       owner: paymentInfo?.paid
-        ? `✅ PAYMENT RECEIVED - €${paymentInfo.amount} - Holland VIP Transfers`
+        ? `🚨 New Booking Request - ✅ PAYMENT RECEIVED - €${paymentInfo.amount} - Holland VIP Transfers`
         : isNL ? `🚨 Nieuwe Boekingsaanvraag - Holland VIP Transfers` : `🚨 New Booking Request - Holland VIP Transfers`,
       customer: isNL
         ? `Bevestiging van uw ${isGroupEvents ? "groepsevenementen" : "boekings"}aanvraag - Holland VIP Transfers`
@@ -643,6 +645,13 @@ export async function POST(request: NextRequest) {
                     : ""
                 }
 
+                ${isPaid ? `
+                  <div style="background-color:#dcfce7;padding:20px;border-radius:8px;border:2px solid #86efac;margin-bottom:20px;text-align:center">
+                    <p style="font-size:14px;font-weight:bold;color:#166534;margin:0 0 8px 0">💳 BETALING ONTVANGEN</p>
+                    <p style="font-size:40px;font-weight:bold;color:#16a34a;margin:0">€ ${paidAmount}</p>
+                  </div>
+                  ` : ''}
+
                 <!-- Action Required -->
                 <div style="background-color: #fef2f2; padding: 20px; border-radius: 8px; border: 2px solid #fca5a5; margin-bottom: 30px;">
                   <h2 style="font-size: 18px; font-weight: bold; color: #dc2626; margin-bottom: 10px;">
@@ -759,6 +768,14 @@ export async function POST(request: NextRequest) {
               <h2 style="color: #333; border-bottom: 2px solid #f97316; padding-bottom: 10px;">${greeting}</h2>
 
               <p style="color: #666; line-height: 1.6;">${thankYouMessage}</p>
+
+              ${isPaid ? `
+                <div style="background-color:#dcfce7;border:2px solid #86efac;border-radius:12px;padding:20px;margin:20px 0;text-align:center">
+                  <p style="font-size:16px;font-weight:bold;color:#166534;margin:0 0 8px 0">✅ BETALING ONTVANGEN</p>
+                  <p style="font-size:36px;font-weight:bold;color:#16a34a;margin:0">€ ${paidAmount}</p>
+                  <p style="color:#166534;font-size:14px;margin:8px 0 0 0">Uw boeking is bevestigd!</p>
+                </div>
+                ` : ''}
 
               <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
                 <h3 style="color: #333; margin-top: 0;">${isNL ? (isGroupEvents ? "Evenement Details" : "Boekingsdetails") : (isGroupEvents ? "Event Details" : "Booking Details")}</h3>
