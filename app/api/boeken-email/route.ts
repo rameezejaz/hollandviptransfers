@@ -69,11 +69,12 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     console.log("📋 Received data:", JSON.stringify(body, null, 2))
 
-    const { data, vehicle, lang, bookingType } = body as {
+    const { data, vehicle, lang, bookingType, paymentInfo } = body as {
       data: FormData
       vehicle: Vehicle
       lang: string
       bookingType?: string
+      paymentInfo?: { paid: boolean; amount: number; sessionId: string }
     }
 
     // Check API key
@@ -90,9 +91,9 @@ export async function POST(request: NextRequest) {
     const isGroupEvents = bookingType === "group_events"
 
     const subjects = {
-      owner: isNL
-        ? `🚨 Nieuwe ${isGroupEvents ? "Groepsevenementen" : "Boekings"}aanvraag - Holland VIP Transfers`
-        : `🚨 New ${isGroupEvents ? "Groups & Events" : "Booking"} Request - Holland VIP Transfers`,
+      owner: paymentInfo?.paid
+        ? `✅ PAYMENT RECEIVED - €${paymentInfo.amount} - Holland VIP Transfers`
+        : isNL ? `🚨 Nieuwe Boekingsaanvraag - Holland VIP Transfers` : `🚨 New Booking Request - Holland VIP Transfers`,
       customer: isNL
         ? `Bevestiging van uw ${isGroupEvents ? "groepsevenementen" : "boekings"}aanvraag - Holland VIP Transfers`
         : `${isGroupEvents ? "Groups & Events" : "Booking"} Request Confirmation - Holland VIP Transfers`,

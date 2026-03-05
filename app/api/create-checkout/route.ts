@@ -42,6 +42,7 @@ export async function POST(request: NextRequest) {
         from: data.from || "",
         to: data.to || "",
         lang: lang,
+        emailSent: "false",
       },
     })
 
